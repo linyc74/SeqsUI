@@ -23,7 +23,7 @@ class View(QWidget):
 
         self.resize(1280, 768)
         self.setWindowIcon(QtGui.QIcon(f'{dirname(__file__)}/logo.png'))
-        self.setWindowTitle('Sequencing Table Editor')
+        self.setWindowTitle('Seqs UI')
 
         self.init_layout()
         self.init_table()

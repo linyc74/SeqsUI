@@ -64,7 +64,7 @@ SEQUENCING_TABLE_COLUMNS = [
 
 class Model:
 
-    dataframe: pd.DataFrame
+    dataframe: pd.DataFrame  # this is the sequencing table
 
     def __init__(self):
         self.reset_dataframe()
@@ -97,7 +97,7 @@ class Model:
 
         for i, in_row in df.iterrows():
 
-            row = GenerateDataframeRow().main(
+            row = GenerateSequencingTableRow().main(
                 dataframe=self.dataframe,
                 in_row=in_row)
 
@@ -106,7 +106,7 @@ class Model:
         return True, ''
 
 
-class GenerateDataframeRow:
+class GenerateSequencingTableRow:
 
     dataframe: pd.DataFrame
     in_row: pd.Series
@@ -133,7 +133,7 @@ class GenerateDataframeRow:
         return self.out_row
 
     def set_patient_id(self):
-        if len(self.dataframe) == 0:
+        if len(self.dataframe) == 0:  # empty sequencing table
             self.patient_id = 1
             return
 
