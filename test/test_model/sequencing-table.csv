@@ -1,0 +1,2 @@
+﻿ID,Patient ID,Patient Sequencing Number,Import Date,Hospital Research Center,Lab,Lab Patient ID,Lab Sample ID,Cancer Type,Tissue Type,Sequencing Type,Vial,Vial Sequencing Number
+001-00001-0101-E-X01-01,1,1,2023-07-24,Taipei Veterans General Hospital,CCY_LAB,VGH001,VGH001_N,HNSCC,Adjacent Normal,WES,X,1

@@ -1,0 +1,3 @@
+﻿Hospital Research Center,Lab,Lab Patient ID,Cancer Type,Tissue Type,Sequencing Type,Vial,Vial Sequencing Number,Lab Sample ID
+Taipei Veterans General Hospital,CCY_LAB,VGH002,HNSCC,Adjacent Normal,WES,X,1,VGH002_N
+Taipei Veterans General Hospital,CCY_LAB,VGH003,HNSCC,Primary Tumor,WES,X,1,VGH003_T
