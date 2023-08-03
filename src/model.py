@@ -64,7 +64,7 @@ SEQUENCING_TABLE_COLUMNS = [
 
 class Model:
 
-    dataframe: pd.DataFrame  # this is the sequencing table
+    dataframe: pd.DataFrame  # this is the main sequencing table
 
     def __init__(self):
         self.reset_dataframe()
