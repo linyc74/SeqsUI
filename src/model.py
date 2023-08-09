@@ -1,7 +1,7 @@
 import pandas as pd
-from typing import Tuple
 from datetime import date
 from os.path import basename
+from typing import Tuple, List, Optional
 
 
 HOSPITAL_RESEARCH_CENTER_TO_CODE = {
@@ -87,6 +87,21 @@ class Model:
 
     def get_dataframe(self) -> pd.DataFrame:
         return self.dataframe.copy()
+
+    def sort_dataframe(self, by: str, ascending: bool):
+        self.dataframe = self.dataframe.sort_values(
+            by=by,
+            ascending=ascending,
+            kind='mergesort'  # deterministic, keep the original order when tied
+        )
+
+    def drop(self, rows: Optional[List[int]] = None, columns: Optional[List[str]] = None):
+        self.dataframe = self.dataframe.drop(
+            index=rows,
+            columns=columns
+        ).reset_index(
+            drop=True
+        )
 
     def import_new_entries(self, csv: str) -> Tuple[bool, str]:
         df = pd.read_csv(csv)
