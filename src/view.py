@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QPushButton, \
     QFileDialog, QMessageBox, QGridLayout, QDialog, QFormLayout, QLineEdit, QDialogButtonBox
 from os.path import dirname
-from typing import List, Tuple
+from typing import List, Union
 from .model import Model
 
 
@@ -227,74 +227,38 @@ class MessageBoxYesNo(MessageBox):
         return self.box.exec_() == QMessageBox.Yes
 
 
-class DialogRead1Read2Suffix:
+class DialogLineEdits:
 
-    dialog: QDialog
-    layout: QFormLayout
-    line_edit1: QLineEdit
-    line_edit2: QLineEdit
-    button_box: QDialogButtonBox
-
-    def __init__(self, parent: QWidget):
-        self.__init__dialog(parent=parent)
-        self.__init__layout()
-        self.__init__line_edits()
-        self.__init__button_box()
-
-    def __init__dialog(self, parent: QWidget):
-        self.dialog = QDialog(parent=parent)
-        self.dialog.setWindowTitle(' ')
-
-    def __init__layout(self):
-        self.layout = QFormLayout(parent=self.dialog)
-
-    def __init__line_edits(self):
-        self.line_edit1 = QLineEdit('_R1.fastq.gz', parent=self.dialog)
-        self.line_edit2 = QLineEdit('_R2.fastq.gz', parent=self.dialog)
-        self.layout.addRow('Read 1 Suffix:', self.line_edit1)
-        self.layout.addRow('Read 2 Suffix:', self.line_edit2)
-
-    def __init__button_box(self):
-        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=self.dialog)
-        self.button_box.accepted.connect(self.dialog.accept)
-        self.button_box.rejected.connect(self.dialog.reject)
-        self.layout.addWidget(self.button_box)
-
-    def __call__(self) -> Tuple[str, str]:
-        result = self.dialog.exec_()
-        if result == QDialog.Accepted:
-            return self.line_edit1.text(), self.line_edit2.text()
-        else:
-            return '', ''
-
-
-class DialogBedFile:
+    LINE_TITLES: List[str]
+    LINE_DEFAULTS: List[str]
 
     parent: QWidget
 
     dialog: QDialog
     layout: QFormLayout
-    line_edit: QLineEdit
+    line_edits: List[QLineEdit]
     button_box: QDialogButtonBox
 
     def __init__(self, parent: QWidget):
         self.parent = parent
-
         self.__init__dialog()
         self.__init__layout()
         self.__init__line_edits()
         self.__init__button_box()
 
     def __init__dialog(self):
-        self.dialog = QDialog(self.parent)
+        self.dialog = QDialog(parent=self.parent)
         self.dialog.setWindowTitle(' ')
 
     def __init__layout(self):
         self.layout = QFormLayout(parent=self.dialog)
 
     def __init__line_edits(self):
-        self.line_edit = QLineEdit('*.bed', parent=self.dialog)
-        self.layout.addRow('BED File:', self.line_edit)
+        self.line_edits = []
+        for title, default in zip(self.LINE_TITLES, self.LINE_DEFAULTS):
+            line_edit = QLineEdit(default, parent=self.dialog)
+            self.line_edits.append(line_edit)
+            self.layout.addRow(title, line_edit)
 
     def __init__button_box(self):
         self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=self.dialog)
@@ -302,6 +266,32 @@ class DialogBedFile:
         self.button_box.rejected.connect(self.dialog.reject)
         self.layout.addWidget(self.button_box)
 
-    def __call__(self) -> str:
-        result = self.dialog.exec_()
-        return self.line_edit.text() if result == QDialog.Accepted else ''
+    def __call__(self) -> Union[str, tuple]:
+        if self.dialog.exec_() == QDialog.Accepted:
+            ret = tuple(e.text() for e in self.line_edits)
+        else:
+            ret = tuple('' for _ in self.LINE_DEFAULTS)
+
+        return ret if len(ret) > 1 else ret[0]
+
+
+class DialogRead1Read2Suffix(DialogLineEdits):
+
+    LINE_TITLES = [
+        'Read 1 Suffix:',
+        'Read 2 Suffix:',
+    ]
+    LINE_DEFAULTS = [
+        '_R1.fastq.gz',
+        '_R2.fastq.gz',
+    ]
+
+
+class DialogBedFile(DialogLineEdits):
+
+    LINE_TITLES = [
+        'BED File:',
+    ]
+    LINE_DEFAULTS = [
+        '*.bed',
+    ]

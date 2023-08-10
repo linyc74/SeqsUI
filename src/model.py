@@ -246,7 +246,7 @@ class BuildRunTable:
             'Tumor Fastq R2': f'{tumor_id}{r2}',
             'Normal Fastq R1': f'{normal_id}{r1}' if normal_id is not None else '',
             'Normal Fastq R2': f'{normal_id}{r2}' if normal_id is not None else '',
-            'Output': tumor_id,
+            'Output Name': tumor_id,
             'BED File': self.bed_file,
         })
         self.run_df = append(self.run_df, row)
