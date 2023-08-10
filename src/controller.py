@@ -51,11 +51,11 @@ class Action:
 class ActionReadSequencingTable(Action):
 
     def __call__(self):
-        csv = self.view.file_dialog_open_csv()
-        if csv == '':
+        file = self.view.file_dialog_open_table()
+        if file == '':
             return
 
-        success, msg = self.model.read_sequencing_table(csv=csv)
+        success, msg = self.model.read_sequencing_table(file=file)
         if not success:
             self.view.message_box_error(msg=msg)
 
@@ -65,11 +65,11 @@ class ActionReadSequencingTable(Action):
 class ActionImportNewEntries(Action):
 
     def __call__(self):
-        csv = self.view.file_dialog_open_csv()
-        if csv == '':
+        file = self.view.file_dialog_open_table()
+        if file == '':
             return
 
-        success, msg = self.model.import_new_entries(csv=csv)
+        success, msg = self.model.import_new_entries(file=file)
         if not success:
             self.view.message_box_error(msg=msg)
 
@@ -79,10 +79,10 @@ class ActionImportNewEntries(Action):
 class ActionSaveSequencingTable(Action):
 
     def __call__(self):
-        csv = self.view.file_dialog_save_csv()
-        if csv == '':
+        file = self.view.file_dialog_save_table()
+        if file == '':
             return
-        self.model.save_sequencing_table(csv=csv)
+        self.model.save_sequencing_table(file=file)
 
 
 class ActionSort(Action):

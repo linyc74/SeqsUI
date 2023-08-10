@@ -65,8 +65,7 @@ class View(QWidget):
         'reset_table': 'Reset Table',
 
         'copy_selected_fastq_files': 'Copy Selected Fastq Files',
-        # 'build_execution_sheet': 'Build Execution Sheet',
-        # 'build_cbioportal_data': 'Build cBioPortal Data',
+        'build_run_table': 'Build Run Table',
     }
     BUTTON_NAME_TO_POSITION = {
         'read_sequencing_table': (0, 0),
@@ -79,8 +78,7 @@ class View(QWidget):
         'reset_table': (3, 1),
 
         'copy_selected_fastq_files': (0, 2),
-        # 'build_execution_sheet': (1, 2),
-        # 'build_cbioportal_data': (2, 2),
+        'build_run_table': (1, 2),
     }
 
     model: Model
@@ -120,8 +118,8 @@ class View(QWidget):
             self.button_grid.addWidget(button, *pos)
 
     def __init__methods(self):
-        self.file_dialog_open_csv = FileDialogOpenCsv(self)
-        self.file_dialog_save_csv = FileDialogSaveCsv(self)
+        self.file_dialog_open_table = FileDialogOpenTable(self)
+        self.file_dialog_save_table = FileDialogSaveTable(self)
         self.file_dialog_open_directory = FileDialogOpenDirectory(self)
         self.message_box_info = MessageBoxInfo(self)
         self.message_box_error = MessageBoxError(self)
@@ -146,26 +144,26 @@ class FileDialog:
         self.parent = parent
 
 
-class FileDialogOpenCsv(FileDialog):
+class FileDialogOpenTable(FileDialog):
 
     def __call__(self) -> str:
         fpath, ftype = QFileDialog.getOpenFileName(
             parent=self.parent,
             caption='Open',
-            filter='All Files (*.*);;CSV files (*.csv)',
+            filter='All Files (*.*);;CSV files (*.csv);;Excel files (*.xlsx)',
             initialFilter='CSV files (*.csv)',
             options=QFileDialog.DontUseNativeDialog
         )
         return fpath
 
 
-class FileDialogSaveCsv(FileDialog):
+class FileDialogSaveTable(FileDialog):
 
     def __call__(self) -> str:
         fpath, ftype = QFileDialog.getSaveFileName(
             parent=self.parent,
             caption='Save As',
-            filter='All Files (*.*);;CSV files (*.csv)',
+            filter='All Files (*.*);;CSV files (*.csv);;Excel files (*.xlsx)',
             initialFilter='CSV files (*.csv)',
             options=QFileDialog.DontUseNativeDialog
         )

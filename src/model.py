@@ -72,18 +72,21 @@ class Model:
     def reset_dataframe(self):
         self.dataframe = pd.DataFrame(columns=SEQUENCING_TABLE_COLUMNS)
 
-    def read_sequencing_table(self, csv: str) -> Tuple[bool, str]:
-        df = pd.read_csv(csv)
+    def read_sequencing_table(self, file: str) -> Tuple[bool, str]:
+        df = pd.read_excel(file) if file.endswith('.xlsx') else pd.read_csv(file)
 
         for c in SEQUENCING_TABLE_COLUMNS:
             if c not in df.columns:
-                return False, f'Column "{c}" not found in "{basename(csv)}"'
+                return False, f'Column "{c}" not found in "{basename(file)}"'
 
         self.dataframe = df
         return True, ''
 
-    def save_sequencing_table(self, csv: str):
-        self.dataframe.to_csv(csv, index=False)
+    def save_sequencing_table(self, file: str):
+        if file.endswith('.xlsx'):
+            self.dataframe.to_excel(file, index=False)
+        else:
+            self.dataframe.to_csv(file, index=False)
 
     def get_dataframe(self) -> pd.DataFrame:
         return self.dataframe.copy()
@@ -103,12 +106,12 @@ class Model:
             drop=True
         )
 
-    def import_new_entries(self, csv: str) -> Tuple[bool, str]:
-        df = pd.read_csv(csv)
+    def import_new_entries(self, file: str) -> Tuple[bool, str]:
+        df = pd.read_excel(file) if file.endswith('.xlsx') else pd.read_csv(file)
 
         for c in IMPORT_COLUMNS:
             if c not in df.columns:
-                return False, f'Column "{c}" not found in "{basename(csv)}"'
+                return False, f'Column "{c}" not found in "{basename(file)}"'
 
         for i, in_row in df.iterrows():
 
