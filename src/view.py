@@ -159,10 +159,11 @@ class FileDialogOpenTable(FileDialog):
 
 class FileDialogSaveTable(FileDialog):
 
-    def __call__(self) -> str:
+    def __call__(self, filename: str = '') -> str:
         fpath, ftype = QFileDialog.getSaveFileName(
             parent=self.parent,
             caption='Save As',
+            directory=filename,
             filter='All Files (*.*);;CSV files (*.csv);;Excel files (*.xlsx)',
             initialFilter='CSV files (*.csv)',
             options=QFileDialog.DontUseNativeDialog
