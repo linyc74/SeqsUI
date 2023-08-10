@@ -125,6 +125,7 @@ class View(QWidget):
         self.message_box_error = MessageBoxError(self)
         self.message_box_yes_no = MessageBoxYesNo(self)
         self.dialog_read1_read2_suffix = DialogRead1Read2Suffix(self)
+        self.dialog_bed_file = DialogBedFile(self)
 
     def refresh_table(self):
         self.table.refresh_table()
@@ -265,3 +266,42 @@ class DialogRead1Read2Suffix:
             return self.line_edit1.text(), self.line_edit2.text()
         else:
             return '', ''
+
+
+class DialogBedFile:
+
+    parent: QWidget
+
+    dialog: QDialog
+    layout: QFormLayout
+    line_edit: QLineEdit
+    button_box: QDialogButtonBox
+
+    def __init__(self, parent: QWidget):
+        self.parent = parent
+
+        self.__init__dialog()
+        self.__init__layout()
+        self.__init__line_edits()
+        self.__init__button_box()
+
+    def __init__dialog(self):
+        self.dialog = QDialog(self.parent)
+        self.dialog.setWindowTitle(' ')
+
+    def __init__layout(self):
+        self.layout = QFormLayout(parent=self.dialog)
+
+    def __init__line_edits(self):
+        self.line_edit = QLineEdit('*.bed', parent=self.dialog)
+        self.layout.addRow('BED File:', self.line_edit)
+
+    def __init__button_box(self):
+        self.button_box = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel, parent=self.dialog)
+        self.button_box.accepted.connect(self.dialog.accept)
+        self.button_box.rejected.connect(self.dialog.reject)
+        self.layout.addWidget(self.button_box)
+
+    def __call__(self) -> str:
+        result = self.dialog.exec_()
+        return self.line_edit.text() if result == QDialog.Accepted else ''

@@ -24,9 +24,10 @@ class Controller:
         self.action_save_sequencing_table = ActionSaveSequencingTable(self)
         self.action_sort_ascending = ActionSortAscending(self)
         self.action_sort_descending = ActionSortDescending(self)
+        self.action_delete_selected_rows = ActionDeleteSelectedRows(self)
         self.action_reset_table = ActionResetTable(self)
         self.action_copy_selected_fastq_files = ActionCopySelectedFastqFiles(self)
-        self.action_delete_selected_rows = ActionDeleteSelectedRows(self)
+        self.action_build_run_table = ActionBuildRunTable(self)
 
     def __connect_button_actions(self):
         for name in self.view.BUTTON_NAME_TO_LABEL.keys():
@@ -219,3 +220,53 @@ def md5(file_path: str, buffer_size: int = 8192) -> str:
             md5_hash.update(chunk)
 
     return md5_hash.hexdigest()
+
+
+class ActionBuildRunTable(Action):
+
+    seq_ids: List[str]
+    r1_suffix: str
+    r2_suffix: str
+    bed_file: str
+    output_file: str
+
+    def __call__(self):
+        self.set_seq_ids()
+        if len(self.seq_ids) == 0:
+            self.view.message_box_error('No rows selected')
+            return
+
+        self.set_r1_r2_suffix()
+        if self.r1_suffix == '' or self.r2_suffix == '':
+            return
+
+        self.set_bed_file()
+        if self.bed_file == '':
+            return
+
+        self.set_output_file()
+        if self.output_file == '':
+            return
+
+        self.build_run_table()
+
+    def set_seq_ids(self):
+        rows = self.view.get_selected_rows()
+        self.seq_ids = self.model.dataframe.loc[rows, 'ID'].tolist()
+
+    def set_r1_r2_suffix(self):
+        self.r1_suffix, self.r2_suffix = self.view.dialog_read1_read2_suffix()
+
+    def set_bed_file(self):
+        self.bed_file = self.view.dialog_bed_file()
+
+    def set_output_file(self):
+        self.output_file = self.view.file_dialog_save_table(filename='run_table.xlsx')
+
+    def build_run_table(self):
+        self.model.build_run_table(
+            seq_ids=self.seq_ids,
+            r1_suffix=self.r1_suffix,
+            r2_suffix=self.r2_suffix,
+            bed_file=self.bed_file,
+            output_file=self.output_file)

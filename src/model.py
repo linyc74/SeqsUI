@@ -96,6 +96,8 @@ class Model:
             by=by,
             ascending=ascending,
             kind='mergesort'  # deterministic, keep the original order when tied
+        ).reset_index(
+            drop=True
         )
 
     def drop(self, rows: Optional[List[int]] = None, columns: Optional[List[str]] = None):
@@ -122,6 +124,22 @@ class Model:
             self.dataframe = append(self.dataframe, row)
 
         return True, ''
+
+    def build_run_table(
+            self,
+            seq_ids: List[str],
+            r1_suffix: str,
+            r2_suffix: str,
+            bed_file: str,
+            output_file: str):
+
+        return BuildRunTable().main(
+            seq_df=self.dataframe,
+            seq_ids=seq_ids,
+            r1_suffix=r1_suffix,
+            r2_suffix=r2_suffix,
+            bed_file=bed_file,
+            output_file=output_file)
 
 
 class GenerateSequencingTableRow:
@@ -186,6 +204,70 @@ class GenerateSequencingTableRow:
         })
         for c in IMPORT_COLUMNS:
             self.out_row[c] = self.in_row[c]
+
+
+class BuildRunTable:
+
+    seq_df: pd.DataFrame
+    seq_ids: List[str]
+    r1_suffix: str
+    r2_suffix: str
+    bed_file: str
+    output_file: str
+
+    run_df: pd.DataFrame
+
+    def main(
+            self,
+            seq_df: pd.DataFrame,
+            seq_ids: List[str],
+            r1_suffix: str,
+            r2_suffix: str,
+            bed_file: str,
+            output_file: str):
+
+        self.seq_df = seq_df.copy()
+        self.seq_ids = seq_ids
+        self.r1_suffix = r1_suffix
+        self.r2_suffix = r2_suffix
+        self.bed_file = bed_file
+        self.output_file = output_file
+
+        self.run_df = pd.DataFrame()
+        for seq_id in self.seq_ids:
+            self.generate_one_row(tumor_id=seq_id)
+        self.save_output_file()
+
+    def generate_one_row(self, tumor_id: str):
+        r1, r2 = self.r1_suffix, self.r2_suffix
+        normal_id = self.get_matched_normal_id(tumor_id=tumor_id)
+        row = pd.Series({
+            'Tumor Fastq R1': f'{tumor_id}{r1}',
+            'Tumor Fastq R2': f'{tumor_id}{r2}',
+            'Normal Fastq R1': f'{normal_id}{r1}' if normal_id is not None else '',
+            'Normal Fastq R2': f'{normal_id}{r2}' if normal_id is not None else '',
+            'Output': tumor_id,
+            'BED File': self.bed_file,
+        })
+        self.run_df = append(self.run_df, row)
+
+    def get_matched_normal_id(self, tumor_id: str) -> Optional[str]:
+        """
+        Example:
+            If tumor_id is                   '001-00001-0102-E-X01-02'
+            then normal_id should start with '001-00001-0101'
+        """
+        matched_normal_prefix = tumor_id[:12] + '01'
+        for seq_id in self.seq_df[ID]:
+            if seq_id.startswith(matched_normal_prefix):
+                return seq_id
+        return None
+
+    def save_output_file(self):
+        if self.output_file.endswith('.xlsx'):
+            self.run_df.to_excel(self.output_file, index=False)
+        else:
+            self.run_df.to_csv(self.output_file, index=False)
 
 
 def append(df: pd.DataFrame, s: pd.Series) -> pd.DataFrame:
