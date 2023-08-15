@@ -1,8 +1,9 @@
+import os
+
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QPushButton, \
     QFileDialog, QMessageBox, QGridLayout, QDialog, QFormLayout, QLineEdit, QDialogButtonBox
-from os.path import dirname
 from typing import List, Union
 from .model import Model
 
@@ -51,8 +52,8 @@ class Table(QTableWidget):
 
 class View(QWidget):
 
-    TITLE = 'Seqs UI'
-    ICON_PNG = f'{dirname(__file__)}/logo.png'
+    TITLE = 'SeqsUI'
+    ICON_PNG = f'{os.getcwd()}/icon/logo.ico'
     WIDTH, HEIGHT = 1280, 768
     BUTTON_NAME_TO_LABEL = {
         'read_sequencing_table': 'Read Sequencing Table',

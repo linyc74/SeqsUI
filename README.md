@@ -6,7 +6,8 @@
 
 ```bash
 git clone https://github.com/linyc74/SeqsUI.git
-python SeqsUI
+cd SeqsUI
+python SeqsUI.py
 ```
 
 ### Dependency
