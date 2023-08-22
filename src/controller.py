@@ -80,7 +80,7 @@ class ActionImportNewEntries(Action):
 class ActionSaveSequencingTable(Action):
 
     def __call__(self):
-        file = self.view.file_dialog_save_table(filename='sequencing_table.xlsx')
+        file = self.view.file_dialog_save_table(filename='sequencing_table.csv')
         if file == '':
             return
         self.model.save_sequencing_table(file=file)

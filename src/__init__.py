@@ -5,12 +5,17 @@ from .model import Model
 from .controller import Controller
 
 
-__VERSION__ = '1.1.0'
+VERSION = '1.1.1-beta'
+STARTING_MESSAGE = f'''\
+SeqsUI {VERSION}
+College of Dentistry, National Yang Ming Chiao Tung University (NYCU), Taiwan
+Yu-Cheng Lin, DDS, MS, PhD (ylin@nycu.edu.tw)
+'''
 
 
 class Main:
 
-    APP_ID = f'NYCU.Dentistry.SeqsUI.{__VERSION__}'
+    APP_ID = f'NYCU.Dentistry.SeqsUI.{VERSION}'
 
     model: Model
     view: View
@@ -24,6 +29,8 @@ class Main:
         self.model = Model()
         self.view = View(self.model)
         self.controller = Controller(self.model, self.view)
+
+        print(STARTING_MESSAGE, flush=True)
 
         sys.exit(app.exec_())
 

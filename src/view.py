@@ -1,10 +1,10 @@
 import os
-
+import pandas as pd
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QPushButton, \
     QFileDialog, QMessageBox, QGridLayout, QDialog, QFormLayout, QLineEdit, QDialogButtonBox
-from typing import List, Union
+from typing import List, Union, Any
 from .model import Model
 
 
@@ -26,7 +26,8 @@ class Table(QTableWidget):
         self.setHorizontalHeaderLabels(df.columns)
         for i in range(len(df.index)):
             for j in range(len(df.columns)):
-                item = QTableWidgetItem(str(df.iloc[i, j]))
+                value = df.iloc[i, j]
+                item = QTableWidgetItem(to_str(value))
                 item.setFlags(item.flags() & ~Qt.ItemIsEditable)  # makes the item immutable, i.e. user cannot edit it
                 self.setItem(i, j, item)
 
@@ -48,6 +49,15 @@ class Table(QTableWidget):
             if column not in ret:
                 ret.append(column)
         return ret
+
+
+def to_str(value: Any) -> str:
+    if pd.isna(value):
+        return ''
+    elif type(value) == pd.Timestamp:
+        return value.strftime('%Y-%m-%d')
+    else:
+        return str(value)
 
 
 class View(QWidget):
