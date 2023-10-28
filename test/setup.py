@@ -1,12 +1,24 @@
 import os
+import shutil
 import unittest
 import pandas as pd
+from os.path import relpath, dirname, join
 
 
 class TestCase(unittest.TestCase):
 
     def set_up(self, py_path: str):
-        self.indir = os.path.relpath(path=py_path[:-3], start=os.getcwd())
+        self.indir = relpath(path=py_path[:-3], start=os.getcwd())
+        basedir = dirname(self.indir)
+        self.workdir = join(basedir, 'workdir')
+        self.outdir = join(basedir, 'outdir')
+
+        for d in [self.workdir, self.outdir]:
+            os.makedirs(d, exist_ok=True)
+
+    def tear_down(self):
+        shutil.rmtree(self.workdir)
+        shutil.rmtree(self.outdir)
 
     def assertDataFrameEqual(self, first: pd.DataFrame, second: pd.DataFrame):
         self.assertListEqual(list(first.columns), list(second.columns))

@@ -1,0 +1,6 @@
+ID,Patient ID,Patient Sequencing Number,Import Date,Hospital Research Center,Lab,Lab Patient ID,Lab Sample ID,Cancer Type,Tissue Type,Sequencing Type,Vial,Vial Sequencing Number
+002-00002-0101-E-X01-01,2,1,2000/1/1,National Yang Ming Chiao Tung University Hospital,GOOD_LAB,Xi,Xi-normal,HNSCC,Normal,WES,X,1
+002-00002-0101-E-X01-99,2,99,2020/12/31,National Yang Ming Chiao Tung University Hospital,GOOD_LAB,Xi,Xi-normal-99,HNSCC,Normal,WES,X,1
+002-00002-0103-E-X01-02,2,2,2000/1/1,National Yang Ming Chiao Tung University Hospital,GOOD_LAB,Xi,Xi-pre,HNSCC,Precancer,WES,X,1
+002-00002-0102-E-X01-03,2,3,2000/1/1,National Yang Ming Chiao Tung University Hospital,GOOD_LAB,Xi,Xi-cancer,HNSCC,Primary Tumor,WES,X,1
+002-00003-0102-E-X01-03,3,3,2000/1/1,National Yang Ming Chiao Tung University Hospital,GOOD_LAB,Li,Li-cancer,HNSCC,Primary Tumor,WES,X,1

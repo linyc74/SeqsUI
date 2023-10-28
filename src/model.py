@@ -215,6 +215,97 @@ class BuildRunTable:
     bed_file: str
     output_file: str
 
+    tumor_ids: List[str]
+    normal_ids: List[str]
+
+    run_df: pd.DataFrame
+
+    def main(
+            self,
+            seq_df: pd.DataFrame,
+            seq_ids: List[str],
+            r1_suffix: str,
+            r2_suffix: str,
+            bed_file: str,
+            output_file: str):
+
+        self.seq_df = seq_df.copy()
+        self.seq_ids = seq_ids
+        self.r1_suffix = r1_suffix
+        self.r2_suffix = r2_suffix
+        self.bed_file = bed_file
+        self.output_file = output_file
+
+        self.subset_seq_df()
+        self.set_tumor_ids()
+        self.set_normal_ids()
+
+        self.run_df = pd.DataFrame()
+        for seq_id in self.tumor_ids:
+            self.generate_one_row(tumor_id=seq_id)
+        self.save_output_file()
+
+    def subset_seq_df(self):
+        self.seq_df = self.seq_df[self.seq_df[ID].isin(self.seq_ids)]
+
+    def set_tumor_ids(self):
+        not_normal = self.seq_df[TISSUE_TYPE] != 'Normal'
+        self.tumor_ids = self.seq_df.loc[not_normal, ID].tolist()
+
+    def set_normal_ids(self):
+        normal_df = self.seq_df[self.seq_df[TISSUE_TYPE] == 'Normal']
+
+        normal_df = normal_df.sort_values(
+            by=PATIENT_SEQUENCING_NUMBER,  # by highest (i.e. latest) sequencing number
+            ascending=False
+        ).drop_duplicates(
+            subset=[PATIENT_ID, TISSUE_TYPE],  # each patient can only have one normal sample
+            keep='first'
+        )
+
+        self.normal_ids = normal_df[ID].tolist()
+
+    def generate_one_row(self, tumor_id: str):
+        r1, r2 = self.r1_suffix, self.r2_suffix
+        normal_id = self.get_matched_normal_id(tumor_id=tumor_id)
+        row = pd.Series({
+            'Tumor Fastq R1': f'{tumor_id}{r1}',
+            'Tumor Fastq R2': f'{tumor_id}{r2}',
+            'Normal Fastq R1': f'{normal_id}{r1}' if normal_id is not None else '',
+            'Normal Fastq R2': f'{normal_id}{r2}' if normal_id is not None else '',
+            'Output Name': tumor_id,
+            'BED File': self.bed_file,
+        })
+        self.run_df = append(self.run_df, row)
+
+    def get_matched_normal_id(self, tumor_id: str) -> Optional[str]:
+        """
+        Example:
+            If tumor_id is                   '001-00001-0102-E-X01-02'
+            then normal_id should start with '001-00001-0101'
+        """
+        matched_normal_prefix = tumor_id[:12] + '01'
+        for seq_id in self.normal_ids:
+            if seq_id.startswith(matched_normal_prefix):
+                return seq_id
+        return None
+
+    def save_output_file(self):
+        if self.output_file.endswith('.xlsx'):
+            self.run_df.to_excel(self.output_file, index=False)
+        else:
+            self.run_df.to_csv(self.output_file, index=False)
+
+
+class BuildRunTableOld:
+
+    seq_df: pd.DataFrame
+    seq_ids: List[str]
+    r1_suffix: str
+    r2_suffix: str
+    bed_file: str
+    output_file: str
+
     run_df: pd.DataFrame
 
     def main(
