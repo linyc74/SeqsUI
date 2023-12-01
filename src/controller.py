@@ -56,11 +56,11 @@ class ActionReadSequencingTable(Action):
         if file == '':
             return
 
-        success, msg = self.model.read_sequencing_table(file=file)
-        if not success:
-            self.view.message_box_error(msg=msg)
-
-        self.view.refresh_table()
+        try:
+            self.model.read_sequencing_table(file=file)
+            self.view.refresh_table()
+        except Exception as e:
+            self.view.message_box_error(msg=repr(e))
 
 
 class ActionImportNewEntries(Action):
@@ -70,11 +70,11 @@ class ActionImportNewEntries(Action):
         if file == '':
             return
 
-        success, msg = self.model.import_new_entries(file=file)
-        if not success:
-            self.view.message_box_error(msg=msg)
-
-        self.view.refresh_table()
+        try:
+            self.model.import_new_entries(file=file)
+            self.view.refresh_table()
+        except Exception as e:
+            self.view.message_box_error(msg=repr(e))
 
 
 class ActionSaveSequencingTable(Action):

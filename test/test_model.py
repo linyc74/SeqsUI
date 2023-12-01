@@ -43,13 +43,13 @@ class TestModel(TestCase):
 
     def test_read_wrong_sequencing_table(self):
         model = Model()
-        actual, _ = model.read_sequencing_table(file=f'{self.indir}/wrong.csv')
-        self.assertFalse(actual)
+        with self.assertRaises(AssertionError):
+            model.read_sequencing_table(file=f'{self.indir}/wrong.csv')
 
     def test_import_wrong_sequencing_entries(self):
         model = Model()
-        actual, _ = model.import_new_entries(file=f'{self.indir}/wrong.csv')
-        self.assertFalse(actual)
+        with self.assertRaises(AssertionError):
+            model.import_new_entries(file=f'{self.indir}/wrong.csv')
 
 
 class TestBuildRunTable(TestCase):

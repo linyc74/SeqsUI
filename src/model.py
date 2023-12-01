@@ -72,13 +72,8 @@ class Model:
     def reset_dataframe(self):
         self.dataframe = pd.DataFrame(columns=SEQUENCING_TABLE_COLUMNS)
 
-    def read_sequencing_table(self, file: str) -> Tuple[bool, str]:
-        try:
-            self.dataframe = ReadTable().main(file=file, columns=SEQUENCING_TABLE_COLUMNS)
-            return True, ''
-
-        except AssertionError as e:
-            return False, str(e)
+    def read_sequencing_table(self, file: str):
+        self.dataframe = ReadTable().main(file=file, columns=SEQUENCING_TABLE_COLUMNS)
 
     def save_sequencing_table(self, file: str):
         if file.endswith('.xlsx'):
@@ -106,22 +101,20 @@ class Model:
             drop=True
         )
 
-    def import_new_entries(self, file: str) -> Tuple[bool, str]:
-        try:
-            df = ReadTable().main(file=file, columns=IMPORT_COLUMNS)
+    def import_new_entries(self, file: str):
+        dataframe = self.dataframe.copy()
+        new_entry_df = ReadTable().main(file=file, columns=IMPORT_COLUMNS)
 
-            for i, in_row in df.iterrows():
+        for i, in_row in new_entry_df.iterrows():
 
-                out_row = GenerateSequencingTableRow().main(
-                    dataframe=self.dataframe,
-                    in_row=in_row)
+            out_row = GenerateSequencingTableRow().main(
+                dataframe=dataframe,
+                in_row=in_row)
 
-                self.dataframe = append(self.dataframe, out_row)
+            dataframe = append(dataframe, out_row)
 
-            return True, ''
-
-        except AssertionError as e:
-            return False, str(e)
+        # update self.dataframe only after all rows succeed
+        self.dataframe = dataframe
 
     def build_run_table(
             self,
