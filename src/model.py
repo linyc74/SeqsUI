@@ -19,6 +19,7 @@ TISSUE_TYPE_TO_CODE = {
     'Primary': '02',
     'Primary Tumor': '02',
     'Precancer': '03',
+    'Recurrent': '04',
 }
 SEQUENCING_TYPE_TO_CODE = {
     'WES': 'E',
