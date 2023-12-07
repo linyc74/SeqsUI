@@ -13,43 +13,54 @@ class TestModel(TestCase):
 
     def test_import_first_patient(self):
         model = Model()
-        model.import_new_entries(file=f'{self.indir}/new-patient.csv')
-
-    def test_import_existing_patient(self):
-        model = Model()
-        model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
-
-        model.import_new_entries(file=f'{self.indir}/existing-patient.csv')
+        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-new-patient.csv')
         actual = model.dataframe['ID'].tolist()
         expected = [
             '001-00001-0101-E-X01-01',
-            '001-00001-0101-E-X02-02',
-            '001-00001-0102-E-X01-03',
         ]
         self.assertListEqual(expected, actual)
 
     def test_import_new_patient(self):
         model = Model()
         model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
-
-        model.import_new_entries(file=f'{self.indir}/new-patient.csv')
+        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-new-patient.csv')
         actual = model.dataframe['ID'].tolist()
         expected = [
             '001-00001-0101-E-X01-01',
             '001-00002-0101-E-X01-01',
-            '001-00003-0102-E-X01-01',
         ]
         self.assertListEqual(expected, actual)
 
-    def test_read_wrong_sequencing_table(self):
+    def test_import_existing_patient_new_sample(self):
         model = Model()
-        with self.assertRaises(AssertionError):
-            model.read_sequencing_table(file=f'{self.indir}/wrong.csv')
+        model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
+        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-existing-patient-new-sample.csv')
+        actual = model.dataframe['ID'].tolist()
+        expected = [
+            '001-00001-0101-E-X01-01',
+            '001-00001-0101-R-A01-02',
+        ]
+        self.assertListEqual(expected, actual)
 
-    def test_import_wrong_sequencing_entries(self):
+    def test_import_existing_sample(self):
         model = Model()
-        with self.assertRaises(AssertionError):
-            model.import_new_entries(file=f'{self.indir}/wrong.csv')
+        model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
+        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-existing-sample.csv')
+        actual = model.dataframe['ID'].tolist()
+        expected = [
+            '001-00001-0101-E-X01-01',
+        ]
+        self.assertListEqual(expected, actual)
+
+    def test_import_not_sequenced_sample(self):
+        model = Model()
+        model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
+        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-not-sequenced.csv')
+        actual = model.dataframe['ID'].tolist()
+        expected = [
+            '001-00001-0101-E-X01-01',
+        ]
+        self.assertListEqual(expected, actual)
 
 
 class TestBuildRunTable(TestCase):

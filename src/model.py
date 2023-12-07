@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import date
 from os.path import basename
-from typing import Tuple, List, Optional
+from typing import List, Optional
 
 
 HOSPITAL_RESEARCH_CENTER_TO_CODE = {
@@ -113,7 +113,8 @@ class Model:
                 dataframe=dataframe,
                 in_row=in_row)
 
-            dataframe = append(dataframe, out_row)
+            if out_row is not None:
+                dataframe = append(dataframe, out_row)
 
         # update self.dataframe only after all rows succeed
         self.dataframe = dataframe
@@ -159,8 +160,8 @@ class ReadTable:
         self.df = pd.read_excel(self.file) if self.file.endswith('.xlsx') else pd.read_csv(self.file)
 
     def assert_columns(self):
-        assert set(self.columns) == set(self.df.columns), \
-            f'Columns in "{basename(self.file)}": {self.df.columns.tolist()} do not match the expected columns: {self.columns}'
+        for c in self.columns:
+            assert c in self.df.columns, f'Column "{c}" is not found in "{basename(self.file)}"'
 
     def convert_datetime_columns(self):
         for c in self.df.columns:
@@ -173,6 +174,9 @@ class GenerateSequencingTableRow:
     dataframe: pd.DataFrame
     in_row: pd.Series
 
+    not_sequenced: bool
+    existing_patient: bool
+    existing_sample: bool
     patient_id: int
     patient_sequencing_number: int
     seq_id: str
@@ -182,10 +186,18 @@ class GenerateSequencingTableRow:
     def main(
             self,
             dataframe: pd.DataFrame,
-            in_row: pd.Series) -> pd.Series:
+            in_row: pd.Series) -> Optional[pd.Series]:
 
         self.dataframe = dataframe.copy()
         self.in_row = in_row.copy()
+
+        self.tell_if_not_sequenced()
+        if self.not_sequenced:
+            return None
+
+        self.tell_if_patient_or_sample_exist()
+        if self.existing_sample:
+            return None
 
         self.set_patient_id()
         self.set_patient_sequencing_number()
@@ -194,19 +206,31 @@ class GenerateSequencingTableRow:
 
         return self.out_row
 
+    def tell_if_not_sequenced(self):
+        self.not_sequenced = pd.isna(self.in_row[SEQUENCING_TYPE])
+
+    def tell_if_patient_or_sample_exist(self):
+        a = self.dataframe[LAB] == self.in_row[LAB]
+        b = self.dataframe[LAB_PATIENT_ID] == self.in_row[LAB_PATIENT_ID]
+        c = self.dataframe[LAB_SAMPLE_ID] == self.in_row[LAB_SAMPLE_ID]
+
+        self.existing_patient = any(a & b)
+        self.existing_sample = any(a & b & c)
+
     def set_patient_id(self):
         if len(self.dataframe) == 0:  # empty sequencing table
             self.patient_id = 1
             return
 
-        a = self.dataframe[LAB] == self.in_row[LAB]
-        b = self.dataframe[LAB_PATIENT_ID] == self.in_row[LAB_PATIENT_ID]
-        is_existing_patient = a & b
-
-        if any(is_existing_patient):
-            self.patient_id = self.dataframe.loc[is_existing_patient, PATIENT_ID].iloc[0]
+        if self.existing_patient:
+            self.patient_id = self.__get_existing_patient_id()
         else:
             self.patient_id = self.dataframe[PATIENT_ID].max() + 1
+
+    def __get_existing_patient_id(self):
+        a = self.dataframe[LAB] == self.in_row[LAB]
+        b = self.dataframe[LAB_PATIENT_ID] == self.in_row[LAB_PATIENT_ID]
+        return self.dataframe.loc[a & b, PATIENT_ID].iloc[0]
 
     def set_patient_sequencing_number(self):
         self.patient_sequencing_number = (self.dataframe[PATIENT_ID] == self.patient_id).sum() + 1
