@@ -13,7 +13,7 @@ class TestModel(TestCase):
 
     def test_import_first_patient(self):
         model = Model()
-        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-new-patient.csv')
+        model.import_patient_sample_sheet(file=f'{self.indir}/patient-sample-sheet-new-patient.csv')
         actual = model.dataframe['ID'].tolist()
         expected = [
             '001-00001-0101-E-X01-01',
@@ -23,7 +23,7 @@ class TestModel(TestCase):
     def test_import_new_patient(self):
         model = Model()
         model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
-        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-new-patient.csv')
+        model.import_patient_sample_sheet(file=f'{self.indir}/patient-sample-sheet-new-patient.csv')
         actual = model.dataframe['ID'].tolist()
         expected = [
             '001-00001-0101-E-X01-01',
@@ -34,7 +34,7 @@ class TestModel(TestCase):
     def test_import_existing_patient_new_sample(self):
         model = Model()
         model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
-        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-existing-patient-new-sample.csv')
+        model.import_patient_sample_sheet(file=f'{self.indir}/patient-sample-sheet-existing-patient-new-sample.csv')
         actual = model.dataframe['ID'].tolist()
         expected = [
             '001-00001-0101-E-X01-01',
@@ -45,7 +45,7 @@ class TestModel(TestCase):
     def test_import_existing_sample(self):
         model = Model()
         model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
-        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-existing-sample.csv')
+        model.import_patient_sample_sheet(file=f'{self.indir}/patient-sample-sheet-existing-sample.csv')
         actual = model.dataframe['ID'].tolist()
         expected = [
             '001-00001-0101-E-X01-01',
@@ -55,7 +55,7 @@ class TestModel(TestCase):
     def test_import_not_sequenced_sample(self):
         model = Model()
         model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
-        model.import_new_entries(file=f'{self.indir}/patient-sample-sheet-not-sequenced.csv')
+        model.import_patient_sample_sheet(file=f'{self.indir}/patient-sample-sheet-not-sequenced.csv')
         actual = model.dataframe['ID'].tolist()
         expected = [
             '001-00001-0101-E-X01-01',

@@ -20,7 +20,7 @@ class Controller:
 
     def __init_actions(self):
         self.action_read_sequencing_table = ActionReadSequencingTable(self)
-        self.action_import_new_entries = ActionImportNewEntries(self)
+        self.action_import_patient_sample_sheet = ActionImportPatientSampleSheet(self)
         self.action_save_sequencing_table = ActionSaveSequencingTable(self)
         self.action_sort_ascending = ActionSortAscending(self)
         self.action_sort_descending = ActionSortDescending(self)
@@ -63,7 +63,7 @@ class ActionReadSequencingTable(Action):
             self.view.message_box_error(msg=repr(e))
 
 
-class ActionImportNewEntries(Action):
+class ActionImportPatientSampleSheet(Action):
 
     def __call__(self):
         file = self.view.file_dialog_open_table()
@@ -71,7 +71,7 @@ class ActionImportNewEntries(Action):
             return
 
         try:
-            self.model.import_new_entries(file=file)
+            self.model.import_patient_sample_sheet(file=file)
             self.view.refresh_table()
         except Exception as e:
             self.view.message_box_error(msg=repr(e))

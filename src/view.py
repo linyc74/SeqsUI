@@ -67,7 +67,7 @@ class View(QWidget):
     WIDTH, HEIGHT = 1280, 768
     BUTTON_NAME_TO_LABEL = {
         'read_sequencing_table': 'Read Sequencing Table',
-        'import_new_entries': 'Import New Entries',
+        'import_patient_sample_sheet': 'Import Patient Sample Sheet',
         'save_sequencing_table': 'Save Sequencing Table',
 
         'sort_ascending': 'Sort (A to Z)',
@@ -80,7 +80,7 @@ class View(QWidget):
     }
     BUTTON_NAME_TO_POSITION = {
         'read_sequencing_table': (0, 0),
-        'import_new_entries': (1, 0),
+        'import_patient_sample_sheet': (1, 0),
         'save_sequencing_table': (2, 0),
 
         'sort_ascending': (0, 1),

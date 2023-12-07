@@ -103,11 +103,11 @@ class Model:
             drop=True
         )
 
-    def import_new_entries(self, file: str):
+    def import_patient_sample_sheet(self, file: str):
         dataframe = self.dataframe.copy()
-        new_entry_df = ReadTable().main(file=file, columns=IMPORT_COLUMNS)
+        new_df = ReadTable().main(file=file, columns=IMPORT_COLUMNS)
 
-        for i, in_row in new_entry_df.iterrows():
+        for i, in_row in new_df.iterrows():
 
             out_row = GenerateSequencingTableRow().main(
                 dataframe=dataframe,
