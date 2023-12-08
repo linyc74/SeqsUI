@@ -41,6 +41,7 @@ LAB_SAMPLE_ID = 'Lab Sample ID'
 CANCER_TYPE = 'Cancer Type'
 TISSUE_TYPE = 'Tissue Type'
 SEQUENCING_TYPE = 'Sequencing Type'
+SEQUENCING_STATUS = 'Sequencing Status'
 VIAL = 'Vial'
 VIAL_SEQUENCING_NUMBER = 'Vial Sequencing Number'
 
@@ -53,6 +54,7 @@ IMPORT_COLUMNS = [
     CANCER_TYPE,
     TISSUE_TYPE,
     SEQUENCING_TYPE,
+    SEQUENCING_STATUS,
     VIAL,
     VIAL_SEQUENCING_NUMBER,
 ]
@@ -61,7 +63,16 @@ SEQUENCING_TABLE_COLUMNS = [
     PATIENT_ID,
     PATIENT_SEQUENCING_NUMBER,
     IMPORT_DATE,
-] + IMPORT_COLUMNS
+    HOSPITAL_RESEARCH_CENTER,
+    LAB,
+    LAB_PATIENT_ID,
+    LAB_SAMPLE_ID,
+    CANCER_TYPE,
+    TISSUE_TYPE,
+    SEQUENCING_TYPE,
+    VIAL,
+    VIAL_SEQUENCING_NUMBER,
+]
 
 
 class Model:
@@ -105,6 +116,7 @@ class Model:
 
     def import_patient_sample_sheet(self, file: str):
         dataframe = self.dataframe.copy()
+
         new_df = ReadTable().main(file=file, columns=IMPORT_COLUMNS)
 
         for i, in_row in new_df.iterrows():
@@ -147,11 +159,13 @@ class ReadTable:
             self,
             file: str,
             columns: List[str]) -> pd.DataFrame:
+
         self.file = file
         self.columns = columns
 
         self.read_file()
         self.assert_columns()
+        self.set_columns()
         self.convert_datetime_columns()
 
         return self.df
@@ -161,7 +175,10 @@ class ReadTable:
 
     def assert_columns(self):
         for c in self.columns:
-            assert c in self.df.columns, f'Column "{c}" is not found in "{basename(self.file)}"'
+            assert c in self.df.columns, f'Column "{c}" not found in "{basename(self.file)}"'
+
+    def set_columns(self):
+        self.df = self.df[self.columns]
 
     def convert_datetime_columns(self):
         for c in self.df.columns:
@@ -199,6 +216,8 @@ class GenerateSequencingTableRow:
         if self.existing_sample:
             return None
 
+        self.assert_no_nan()
+        self.cast_datatype()
         self.set_patient_id()
         self.set_patient_sequencing_number()
         self.set_seq_id()
@@ -207,7 +226,7 @@ class GenerateSequencingTableRow:
         return self.out_row
 
     def tell_if_not_sequenced(self):
-        self.not_sequenced = pd.isna(self.in_row[SEQUENCING_TYPE])
+        self.not_sequenced = str(self.in_row[SEQUENCING_STATUS]).lower() != 'complete'
 
     def tell_if_patient_or_sample_exist(self):
         a = self.dataframe[LAB] == self.in_row[LAB]
@@ -216,6 +235,13 @@ class GenerateSequencingTableRow:
 
         self.existing_patient = any(a & b)
         self.existing_sample = any(a & b & c)
+
+    def assert_no_nan(self):
+        for k, v in self.in_row.items():
+            assert pd.notna(v), f'"{k}" is NaN'
+
+    def cast_datatype(self):
+        self.in_row[VIAL_SEQUENCING_NUMBER] = int(self.in_row[VIAL_SEQUENCING_NUMBER])
 
     def set_patient_id(self):
         if len(self.dataframe) == 0:  # empty sequencing table
@@ -241,7 +267,7 @@ class GenerateSequencingTableRow:
         c = CANCER_TYPE_TO_CODE[self.in_row[CANCER_TYPE]]
         d = TISSUE_TYPE_TO_CODE[self.in_row[TISSUE_TYPE]]
         e = SEQUENCING_TYPE_TO_CODE[self.in_row[SEQUENCING_TYPE]]
-        f = f'{self.in_row[VIAL_SEQUENCING_NUMBER]:02d}'
+        f = f'{self.in_row[VIAL_SEQUENCING_NUMBER]:02d}'  # sometimes vial sequencing number can be float because of nan
         g = f'{self.patient_sequencing_number:02d}'
         self.seq_id = f'{a}-{b}-{c}{d}-{e}-{self.in_row[VIAL]}{f}-{g}'
 
@@ -252,7 +278,8 @@ class GenerateSequencingTableRow:
             PATIENT_SEQUENCING_NUMBER: self.patient_sequencing_number,
             IMPORT_DATE: date.today(),
         })
-        for c in IMPORT_COLUMNS:
+        common_columns = set(IMPORT_COLUMNS).intersection(SEQUENCING_TABLE_COLUMNS)
+        for c in common_columns:
             self.out_row[c] = self.in_row[c]
 
 
