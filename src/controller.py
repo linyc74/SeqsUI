@@ -28,6 +28,7 @@ class Controller:
         self.action_reset_table = ActionResetTable(self)
         self.action_copy_selected_fastq_files = ActionCopySelectedFastqFiles(self)
         self.action_build_run_table = ActionBuildRunTable(self)
+        self.action_fill_in_cell_values = ActionFillInCellValues(self)
 
     def __connect_button_actions(self):
         for name in self.view.BUTTON_NAME_TO_LABEL.keys():
@@ -270,3 +271,22 @@ class ActionBuildRunTable(Action):
             r2_suffix=self.r2_suffix,
             bed_file=self.bed_file,
             output_file=self.output_file)
+
+
+class ActionFillInCellValues(Action):
+
+    def __call__(self):
+
+        selected_cells = self.view.get_selected_cells()
+        if len(selected_cells) == 0:
+            self.view.message_box_error('No cells selected')
+            return
+
+        value = self.view.dialog_fill_in_cell_values()
+        if value == '':
+            return
+
+        for row, column in selected_cells:
+            self.model.dataframe.loc[row, column] = value
+
+        self.view.refresh_table()

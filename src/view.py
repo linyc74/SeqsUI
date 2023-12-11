@@ -4,7 +4,7 @@ from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QPushButton, \
     QFileDialog, QMessageBox, QGridLayout, QDialog, QFormLayout, QLineEdit, QDialogButtonBox
-from typing import List, Union, Any
+from typing import List, Union, Any, Tuple
 from .model import Model
 
 
@@ -50,6 +50,15 @@ class Table(QTableWidget):
                 ret.append(column)
         return ret
 
+    def get_selected_cells(self) -> List[Tuple[int, str]]:
+        ret = []
+        for item in self.selectedItems():
+            ith_row = item.row()
+            ith_col = item.column()
+            column = self.horizontalHeaderItem(ith_col).text()
+            ret.append((ith_row, column))
+        return ret
+
 
 def to_str(value: Any) -> str:
     if pd.isna(value):
@@ -77,6 +86,7 @@ class View(QWidget):
 
         'copy_selected_fastq_files': 'Copy Selected Fastq Files',
         'build_run_table': 'Build Run Table',
+        'fill_in_cell_values': 'Fill In Cell Values',
     }
     BUTTON_NAME_TO_POSITION = {
         'read_sequencing_table': (0, 0),
@@ -90,6 +100,7 @@ class View(QWidget):
 
         'copy_selected_fastq_files': (0, 2),
         'build_run_table': (1, 2),
+        'fill_in_cell_values': (2, 2),
     }
 
     model: Model
@@ -137,6 +148,7 @@ class View(QWidget):
         self.message_box_yes_no = MessageBoxYesNo(self)
         self.dialog_read1_read2_suffix = DialogRead1Read2Suffix(self)
         self.dialog_bed_file = DialogBedFile(self)
+        self.dialog_fill_in_cell_values = DialogFillInCellValues(self)
 
     def refresh_table(self):
         self.table.refresh_table()
@@ -146,6 +158,9 @@ class View(QWidget):
 
     def get_selected_columns(self) -> List[str]:
         return self.table.get_selected_columns()
+
+    def get_selected_cells(self) -> List[Tuple[int, str]]:
+        return self.table.get_selected_cells()
 
 
 class FileDialog:
@@ -305,4 +320,14 @@ class DialogBedFile(DialogLineEdits):
     ]
     LINE_DEFAULTS = [
         '*.bed',
+    ]
+
+
+class DialogFillInCellValues(DialogLineEdits):
+
+    LINE_TITLES = [
+        'Fill In Cell Values:',
+    ]
+    LINE_DEFAULTS = [
+        '',
     ]
