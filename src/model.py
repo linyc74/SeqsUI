@@ -44,6 +44,7 @@ SEQUENCING_TYPE = 'Sequencing Type'
 SEQUENCING_STATUS = 'Sequencing Status'
 VIAL = 'Vial'
 VIAL_SEQUENCING_NUMBER = 'Vial Sequencing Number'
+SEQUENCING_BATCH_ID = 'Sequencing Batch ID'
 
 
 IMPORT_COLUMNS = [
@@ -72,6 +73,7 @@ SEQUENCING_TABLE_COLUMNS = [
     SEQUENCING_TYPE,
     VIAL,
     VIAL_SEQUENCING_NUMBER,
+    SEQUENCING_BATCH_ID,
 ]
 
 
