@@ -242,7 +242,6 @@ class ActionBuildRunTable(Action):
             return
 
         self.set_sequencing_batch_table_file()
-        print(self.sequencing_batch_table_file)
         if self.sequencing_batch_table_file == '':
             return
 
@@ -260,10 +259,11 @@ class ActionBuildRunTable(Action):
         self.r1_suffix, self.r2_suffix = self.view.dialog_read1_read2_suffix()
 
     def set_sequencing_batch_table_file(self):
-        self.sequencing_batch_table_file = self.view.file_dialog_open_table()
+        self.sequencing_batch_table_file = self.view.file_dialog_open_table(
+            caption='Open Sequencing Batch Table')
 
     def set_output_file(self):
-        self.output_file = self.view.file_dialog_save_table(filename='run_table.xlsx')
+        self.output_file = self.view.file_dialog_save_table(filename='run_table.csv')
 
     def build_run_table(self):
         self.model.build_run_table(

@@ -173,10 +173,10 @@ class FileDialog:
 
 class FileDialogOpenTable(FileDialog):
 
-    def __call__(self) -> str:
+    def __call__(self, caption: str = 'Open') -> str:
         fpath, ftype = QFileDialog.getOpenFileName(
             parent=self.parent,
-            caption='Open',
+            caption=caption,
             filter='All Files (*.*);;CSV files (*.csv);;Excel files (*.xlsx)',
             initialFilter='CSV files (*.csv)',
             options=QFileDialog.DontUseNativeDialog

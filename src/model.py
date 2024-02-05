@@ -172,7 +172,12 @@ class ReadTable:
         return self.df
 
     def read_file(self):
-        self.df = pd.read_excel(self.file) if self.file.endswith('.xlsx') else pd.read_csv(self.file)
+        if self.file.endswith('.xlsx'):
+            self.df = pd.read_excel(self.file)
+        elif self.file.endswith('.csv'):
+            self.df = pd.read_csv(self.file)
+        else:
+            raise ValueError(f'File "{self.file}" must be .xlsx or .csv')
 
     def assert_columns(self):
         for c in self.columns:
@@ -348,8 +353,8 @@ class BuildRunTable:
 
     def generate_one_row(self, tumor_id: str):
         r1, r2 = self.r1_suffix, self.r2_suffix
-        normal_id = self.get_matched_normal_id(tumor_id=tumor_id)
-        bed_file = self.get_bed_file(seq_id=tumor_id)
+        normal_id = self.__get_matched_normal_id(tumor_id=tumor_id)
+        bed_file = self.__get_bed_file(seq_id=tumor_id)
         row = pd.Series({
             'Tumor Sample Name': tumor_id,
             'Tumor Fastq R1': f'{tumor_id}{r1}',
@@ -360,9 +365,11 @@ class BuildRunTable:
             'Output Name': tumor_id,
             'BED File': bed_file,
         })
+        if bed_file == '':
+            print(f'WARNING: BED file not found for "{tumor_id}"', flush=True)
         self.run_df = append(self.run_df, row)
 
-    def get_matched_normal_id(self, tumor_id: str) -> Optional[str]:
+    def __get_matched_normal_id(self, tumor_id: str) -> Optional[str]:
         """
         Example:
             If tumor_id is                   '001-00001-0102-E-X01-02'
@@ -374,17 +381,17 @@ class BuildRunTable:
                 return seq_id
         return None
 
-    def get_bed_file(self, seq_id: str) -> str:
+    def __get_bed_file(self, seq_id: str) -> str:
         sequencing_batch_id = self.seq_df.loc[self.seq_df[ID] == seq_id, SEQUENCING_BATCH_ID].iloc[0]
 
-        df = ReadTable().main(
+        seq_batch_df = ReadTable().main(
             file=self.sequencing_batch_table_file,
             columns=['ID', 'BED File']
         ).set_index('ID')
 
-        sequencing_batch_id_to_bed_file = df['BED File'].to_dict()
+        sequencing_batch_id_to_bed_file = seq_batch_df['BED File'].to_dict()
 
-        return sequencing_batch_id_to_bed_file[sequencing_batch_id]
+        return sequencing_batch_id_to_bed_file.get(sequencing_batch_id, '')
 
     def save_output_file(self):
         if self.output_file.endswith('.xlsx'):
