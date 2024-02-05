@@ -42,7 +42,6 @@ LAB_SAMPLE_ID = 'Lab Sample ID'
 CANCER_TYPE = 'Cancer Type'
 TISSUE_TYPE = 'Tissue Type'
 SEQUENCING_TYPE = 'Sequencing Type'
-SEQUENCING_STATUS = 'Sequencing Status'
 VIAL = 'Vial'
 VIAL_SEQUENCING_NUMBER = 'Vial Sequencing Number'
 SEQUENCING_BATCH_ID = 'Sequencing Batch ID'
@@ -56,7 +55,6 @@ IMPORT_COLUMNS = [
     CANCER_TYPE,
     TISSUE_TYPE,
     SEQUENCING_TYPE,
-    SEQUENCING_STATUS,
     VIAL,
     VIAL_SEQUENCING_NUMBER,
 ]
@@ -324,8 +322,8 @@ class BuildRunTable:
         self.set_normal_ids()
 
         self.run_df = pd.DataFrame()
-        for seq_id in self.tumor_ids:
-            self.generate_one_row(tumor_id=seq_id)
+        for tumor_id in self.tumor_ids:
+            self.generate_one_row(tumor_id=tumor_id)
         self.save_output_file()
 
     def subset_seq_df(self):
@@ -352,10 +350,12 @@ class BuildRunTable:
         r1, r2 = self.r1_suffix, self.r2_suffix
         normal_id = self.get_matched_normal_id(tumor_id=tumor_id)
         row = pd.Series({
+            'Tumor Sample Name': tumor_id,
             'Tumor Fastq R1': f'{tumor_id}{r1}',
             'Tumor Fastq R2': f'{tumor_id}{r2}',
-            'Normal Fastq R1': f'{normal_id}{r1}' if normal_id is not None else '',
-            'Normal Fastq R2': f'{normal_id}{r2}' if normal_id is not None else '',
+            'Normal Sample Name': '' if normal_id is None else normal_id,
+            'Normal Fastq R1': '' if normal_id is None else f'{normal_id}{r1}',
+            'Normal Fastq R2': '' if normal_id is None else f'{normal_id}{r2}' ,
             'Output Name': tumor_id,
             'BED File': self.bed_file,
         })

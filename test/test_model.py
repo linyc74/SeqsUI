@@ -82,6 +82,7 @@ class TestBuildRunTable(TestCase):
             r1_suffix='_R1.fastq.gz',
             r2_suffix='_R2.fastq.gz',
             bed_file='bed_file.bed',
+
             output_file=f'{self.outdir}/run-table.csv',
         )
         self.assertDataFrameEqual(
