@@ -81,8 +81,7 @@ class TestBuildRunTable(TestCase):
             seq_ids=seq_ids,
             r1_suffix='_R1.fastq.gz',
             r2_suffix='_R2.fastq.gz',
-            bed_file='bed_file.bed',
-
+            sequencing_batch_table_file=f'{self.indir}/sequencing-batch-table.csv',
             output_file=f'{self.outdir}/run-table.csv',
         )
         self.assertDataFrameEqual(

@@ -137,7 +137,7 @@ class Model:
             seq_ids: List[str],
             r1_suffix: str,
             r2_suffix: str,
-            bed_file: str,
+            sequencing_batch_table_file: str,
             output_file: str):
 
         return BuildRunTable().main(
@@ -145,7 +145,7 @@ class Model:
             seq_ids=seq_ids,
             r1_suffix=r1_suffix,
             r2_suffix=r2_suffix,
-            bed_file=bed_file,
+            sequencing_batch_table_file=sequencing_batch_table_file,
             output_file=output_file)
 
 
@@ -293,7 +293,7 @@ class BuildRunTable:
     seq_ids: List[str]
     r1_suffix: str
     r2_suffix: str
-    bed_file: str
+    sequencing_batch_table_file: str
     output_file: str
 
     tumor_ids: List[str]
@@ -307,14 +307,14 @@ class BuildRunTable:
             seq_ids: List[str],
             r1_suffix: str,
             r2_suffix: str,
-            bed_file: str,
+            sequencing_batch_table_file: str,
             output_file: str):
 
         self.seq_df = seq_df.copy()
         self.seq_ids = seq_ids
         self.r1_suffix = r1_suffix
         self.r2_suffix = r2_suffix
-        self.bed_file = bed_file
+        self.sequencing_batch_table_file = sequencing_batch_table_file
         self.output_file = output_file
 
         self.subset_seq_df()
@@ -349,6 +349,7 @@ class BuildRunTable:
     def generate_one_row(self, tumor_id: str):
         r1, r2 = self.r1_suffix, self.r2_suffix
         normal_id = self.get_matched_normal_id(tumor_id=tumor_id)
+        bed_file = self.get_bed_file(seq_id=tumor_id)
         row = pd.Series({
             'Tumor Sample Name': tumor_id,
             'Tumor Fastq R1': f'{tumor_id}{r1}',
@@ -357,7 +358,7 @@ class BuildRunTable:
             'Normal Fastq R1': '' if normal_id is None else f'{normal_id}{r1}',
             'Normal Fastq R2': '' if normal_id is None else f'{normal_id}{r2}' ,
             'Output Name': tumor_id,
-            'BED File': self.bed_file,
+            'BED File': bed_file,
         })
         self.run_df = append(self.run_df, row)
 
@@ -372,6 +373,18 @@ class BuildRunTable:
             if seq_id.startswith(matched_normal_prefix):
                 return seq_id
         return None
+
+    def get_bed_file(self, seq_id: str) -> str:
+        sequencing_batch_id = self.seq_df.loc[self.seq_df[ID] == seq_id, SEQUENCING_BATCH_ID].iloc[0]
+
+        df = ReadTable().main(
+            file=self.sequencing_batch_table_file,
+            columns=['ID', 'BED File']
+        ).set_index('ID')
+
+        sequencing_batch_id_to_bed_file = df['BED File'].to_dict()
+
+        return sequencing_batch_id_to_bed_file[sequencing_batch_id]
 
     def save_output_file(self):
         if self.output_file.endswith('.xlsx'):

@@ -228,7 +228,7 @@ class ActionBuildRunTable(Action):
     seq_ids: List[str]
     r1_suffix: str
     r2_suffix: str
-    bed_file: str
+    sequencing_batch_table_file: str
     output_file: str
 
     def __call__(self):
@@ -241,8 +241,9 @@ class ActionBuildRunTable(Action):
         if self.r1_suffix == '' or self.r2_suffix == '':
             return
 
-        self.set_bed_file()
-        if self.bed_file == '':
+        self.set_sequencing_batch_table_file()
+        print(self.sequencing_batch_table_file)
+        if self.sequencing_batch_table_file == '':
             return
 
         self.set_output_file()
@@ -258,8 +259,8 @@ class ActionBuildRunTable(Action):
     def set_r1_r2_suffix(self):
         self.r1_suffix, self.r2_suffix = self.view.dialog_read1_read2_suffix()
 
-    def set_bed_file(self):
-        self.bed_file = self.view.dialog_bed_file()
+    def set_sequencing_batch_table_file(self):
+        self.sequencing_batch_table_file = self.view.file_dialog_open_table()
 
     def set_output_file(self):
         self.output_file = self.view.file_dialog_save_table(filename='run_table.xlsx')
@@ -269,7 +270,7 @@ class ActionBuildRunTable(Action):
             seq_ids=self.seq_ids,
             r1_suffix=self.r1_suffix,
             r2_suffix=self.r2_suffix,
-            bed_file=self.bed_file,
+            sequencing_batch_table_file=self.sequencing_batch_table_file,
             output_file=self.output_file)
 
 

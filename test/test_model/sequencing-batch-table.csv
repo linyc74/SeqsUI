@@ -1,0 +1,7 @@
+ID,Company,WES Kit,BED File
+NGS1030101,Welgene,SureSelect XT Human All Exon V5 + UTR,SureSelectHumanAllExonV5+UTRs_75Mbp_GRCh38.bed
+NGS1070824,Welgene,SureSelect XT Clinical Research Exome V2,SureSelectClinicalResearchExomeV2_67.29Mbp_GRCh38.bed
+NGS1120674,Welgene,SureSelect Human All Exon V8,SureSelectHumanAllExonV8_41.6Mbp_hg38.bed
+NGS1120674-1,Welgene,SureSelect Human All Exon V8,SureSelectHumanAllExonV8_41.6Mbp_hg38.bed
+OD20221103_CLA385,YourGene,Twist Human Comprehensive Exome,Twist_Comprehensive_Exome_Covered_Targets_hg38.bed
+TS231220015,TGIA,KAPA HyperExome Plus Kit 8Gb,KAPA_HyperExome_hg38_capture_targets.bed
