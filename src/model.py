@@ -16,6 +16,7 @@ CANCER_TYPE_TO_CODE = {
 TISSUE_TYPE_TO_CODE = {
     'Normal': '01',
     'Adjacent Normal': '01',
+    'Tumor': '02',
     'Primary': '02',
     'Primary Tumor': '02',
     'Precancer': '03',
@@ -210,15 +211,11 @@ class GenerateSequencingTableRow:
         self.dataframe = dataframe.copy()
         self.in_row = in_row.copy()
 
-        self.tell_if_not_sequenced()
-        if self.not_sequenced:
-            return None
-
+        self.assert_no_nan()
         self.tell_if_patient_or_sample_exist()
         if self.existing_sample:
             return None
 
-        self.assert_no_nan()
         self.cast_datatype()
         self.set_patient_id()
         self.set_patient_sequencing_number()
@@ -226,9 +223,6 @@ class GenerateSequencingTableRow:
         self.set_out_row()
 
         return self.out_row
-
-    def tell_if_not_sequenced(self):
-        self.not_sequenced = str(self.in_row[SEQUENCING_STATUS]).lower() != 'complete'
 
     def tell_if_patient_or_sample_exist(self):
         a = self.dataframe[LAB] == self.in_row[LAB]
@@ -239,8 +233,18 @@ class GenerateSequencingTableRow:
         self.existing_sample = any(a & b & c)
 
     def assert_no_nan(self):
-        for k, v in self.in_row.items():
-            assert pd.notna(v), f'"{k}" is NaN'
+        for key in [
+            HOSPITAL_RESEARCH_CENTER,
+            LAB,
+            LAB_PATIENT_ID,
+            LAB_SAMPLE_ID,
+            CANCER_TYPE,
+            TISSUE_TYPE,
+            SEQUENCING_TYPE,
+            VIAL,
+            VIAL_SEQUENCING_NUMBER
+        ]:
+            assert pd.notna(self.in_row[key]), f'Lab Sample ID "{self.in_row[LAB_SAMPLE_ID]}": "{key}" is empty.'
 
     def cast_datatype(self):
         self.in_row[VIAL_SEQUENCING_NUMBER] = int(self.in_row[VIAL_SEQUENCING_NUMBER])

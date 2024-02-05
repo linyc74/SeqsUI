@@ -52,15 +52,11 @@ class TestModel(TestCase):
         ]
         self.assertListEqual(expected, actual)
 
-    def test_import_not_sequenced_sample(self):
+    def test_import_nan_exception(self):
         model = Model()
         model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
-        model.import_patient_sample_sheet(file=f'{self.indir}/patient-sample-sheet-not-sequenced.csv')
-        actual = model.dataframe['ID'].tolist()
-        expected = [
-            '001-00001-0101-E-X01-01',
-        ]
-        self.assertListEqual(expected, actual)
+        with self.assertRaises(AssertionError):
+            model.import_patient_sample_sheet(file=f'{self.indir}/patient-sample-sheet-nan.csv')
 
 
 class TestBuildRunTable(TestCase):
