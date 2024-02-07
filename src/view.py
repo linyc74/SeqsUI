@@ -3,7 +3,7 @@ import pandas as pd
 from PyQt5.QtGui import QIcon
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QPushButton, \
-    QFileDialog, QMessageBox, QGridLayout, QDialog, QFormLayout, QLineEdit, QDialogButtonBox
+    QFileDialog, QMessageBox, QGridLayout, QDialog, QFormLayout, QLineEdit, QDialogButtonBox, QApplication
 from typing import List, Union, Any, Tuple
 from .model import Model
 
@@ -174,28 +174,32 @@ class FileDialog:
 class FileDialogOpenTable(FileDialog):
 
     def __call__(self, caption: str = 'Open') -> str:
-        fpath, ftype = QFileDialog.getOpenFileName(
-            parent=self.parent,
-            caption=caption,
-            filter='All Files (*.*);;CSV files (*.csv);;Excel files (*.xlsx)',
-            initialFilter='CSV files (*.csv)',
-            options=QFileDialog.DontUseNativeDialog
-        )
-        return fpath
+        d = QFileDialog(self.parent)
+        d.resize(1200, 800)
+        d.setWindowTitle(caption)
+        d.setNameFilter('All Files (*.*);;CSV files (*.csv);;Excel files (*.xlsx)')
+        d.selectNameFilter('CSV files (*.csv)')
+        d.setOptions(QFileDialog.DontUseNativeDialog)
+        d.setFileMode(QFileDialog.ExistingFile)
+        d.exec_()
+        selected = d.selectedFiles()
+        return selected[0] if len(selected) > 0 else ''
 
 
 class FileDialogSaveTable(FileDialog):
 
     def __call__(self, filename: str = '') -> str:
-        fpath, ftype = QFileDialog.getSaveFileName(
-            parent=self.parent,
-            caption='Save As',
-            directory=filename,
-            filter='All Files (*.*);;CSV files (*.csv);;Excel files (*.xlsx)',
-            initialFilter='CSV files (*.csv)',
-            options=QFileDialog.DontUseNativeDialog
-        )
-        return fpath
+        d = QFileDialog(self.parent)
+        d.resize(1200, 800)
+        d.setWindowTitle('Save As')
+        d.selectFile(filename)
+        d.setNameFilter('All Files (*.*);;CSV files (*.csv);;Excel files (*.xlsx)')
+        d.selectNameFilter('CSV files (*.csv)')
+        d.setOptions(QFileDialog.DontUseNativeDialog)
+        d.setAcceptMode(QFileDialog.AcceptSave)
+        d.exec_()
+        selected = d.selectedFiles()
+        return selected[0] if len(selected) > 0 else ''
 
 
 class FileDialogOpenDirectory(FileDialog):
