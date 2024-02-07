@@ -205,12 +205,14 @@ class FileDialogSaveTable(FileDialog):
 class FileDialogOpenDirectory(FileDialog):
 
     def __call__(self, caption: str) -> str:
-        fpath = QFileDialog.getExistingDirectory(
-            parent=self.parent,
-            caption=caption,
-            options=QFileDialog.DontUseNativeDialog
-        )
-        return fpath
+        d = QFileDialog(self.parent)
+        d.resize(1200, 800)
+        d.setWindowTitle(caption)
+        d.setOptions(QFileDialog.DontUseNativeDialog)
+        d.setFileMode(QFileDialog.DirectoryOnly)
+        d.exec_()
+        selected = d.selectedFiles()
+        return selected[0] if len(selected) > 0 else ''
 
 
 class MessageBox:
