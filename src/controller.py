@@ -1,9 +1,10 @@
 import shutil
 import hashlib
-from typing import List
+from typing import List, Optional
 from os.path import exists, basename
 from .view import View
 from .model import Model
+from .tools import get_files
 
 
 class Controller:
@@ -140,8 +141,10 @@ class ActionCopySelectedFastqFiles(Action):
     lab_sample_ids: List[str]
     fq_dir: str
     dst_dir: str
-    r1_suffix: str
-    r2_suffix: str
+    in_r1_suffix: str
+    in_r2_suffix: str
+    out_r1_suffix: str
+    out_r2_suffix: str
 
     def __call__(self):
         self.set_seq_ids_and_lab_sample_ids()
@@ -153,12 +156,16 @@ class ActionCopySelectedFastqFiles(Action):
         if self.fq_dir == '':
             return
 
+        self.set_in_r1_r2_suffix()
+        if self.in_r1_suffix == '' or self.in_r2_suffix == '':
+            return
+
         self.set_dst_dir()
         if self.dst_dir == '':
             return
 
-        self.set_r1_r2_suffix()
-        if self.r1_suffix == '' or self.r2_suffix == '':
+        self.set_out_r1_r2_suffix()
+        if self.out_r1_suffix == '' or self.out_r2_suffix == '':
             return
 
         for seq_id, lab_sample_id in zip(self.seq_ids, self.lab_sample_ids):
@@ -175,14 +182,38 @@ class ActionCopySelectedFastqFiles(Action):
     def set_dst_dir(self):
         self.dst_dir = self.view.file_dialog_open_directory(caption='Select Destination Directory')
 
-    def set_r1_r2_suffix(self):
-        self.r1_suffix, self.r2_suffix = self.view.dialog_read1_read2_suffix()
+    def set_in_r1_r2_suffix(self):
+        self.in_r1_suffix, self.in_r2_suffix = self.view.dialog_input_read1_read2_suffix()
+
+    def set_out_r1_r2_suffix(self):
+        self.out_r1_suffix, self.out_r2_suffix = self.view.dialog_output_read1_read2_suffix()
 
     def copy_paired_fastq(self, seq_id: str, lab_sample_id: str):
-        for s in [self.r1_suffix, self.r2_suffix]:
-            src = f'{self.fq_dir}/{lab_sample_id}{s}'
-            dst = f'{self.dst_dir}/{seq_id}{s}'
-            self.__copy(src=src, dst=dst)
+        fq1 = self.__get_src_fastq(lab_sample_id=lab_sample_id, suffix=self.in_r1_suffix)
+        fq2 = self.__get_src_fastq(lab_sample_id=lab_sample_id, suffix=self.in_r2_suffix)
+
+        if fq1 == '' or fq2 == '':
+            self.view.message_box_error(f'Skip {seq_id} due to missing or multiple Fastq files for {lab_sample_id}')
+            return
+
+        self.__copy(src=fq1, dst=f'{self.dst_dir}/{seq_id}{self.out_r1_suffix}')
+        self.__copy(src=fq2, dst=f'{self.dst_dir}/{seq_id}{self.out_r2_suffix}')
+
+    def __get_src_fastq(self, lab_sample_id: str, suffix: str) -> str:
+        files = get_files(
+            source=self.fq_dir,
+            startswith=lab_sample_id,
+            endswith=suffix,
+            isfullpath=True
+        )
+        if len(files) == 0:
+            self.view.message_box_error(f'No Fastq file found for {lab_sample_id}*{suffix}')
+            return ''
+        elif len(files) > 1:
+            self.view.message_box_error(f'Multiple Fastq files found for {lab_sample_id}*{suffix}: {files}')
+            return ''
+        else:
+            return files[0]
 
     def __copy(self, src: str, dst: str):
 
@@ -256,7 +287,7 @@ class ActionBuildRunTable(Action):
         self.seq_ids = self.model.dataframe.loc[rows, 'ID'].tolist()
 
     def set_r1_r2_suffix(self):
-        self.r1_suffix, self.r2_suffix = self.view.dialog_read1_read2_suffix()
+        self.r1_suffix, self.r2_suffix = self.view.dialog_input_read1_read2_suffix()
 
     def set_sequencing_batch_table_file(self):
         self.sequencing_batch_table_file = self.view.file_dialog_open_table(

@@ -146,7 +146,8 @@ class View(QWidget):
         self.message_box_info = MessageBoxInfo(self)
         self.message_box_error = MessageBoxError(self)
         self.message_box_yes_no = MessageBoxYesNo(self)
-        self.dialog_read1_read2_suffix = DialogRead1Read2Suffix(self)
+        self.dialog_input_read1_read2_suffix = DialogInputRead1Read2Suffix(self)
+        self.dialog_output_read1_read2_suffix = DialogOutputRead1Read2Suffix(self)
         self.dialog_bed_file = DialogBedFile(self)
         self.dialog_fill_in_cell_values = DialogFillInCellValues(self)
 
@@ -180,7 +181,7 @@ class FileDialogOpenTable(FileDialog):
         d.setNameFilter('All Files (*.*);;CSV files (*.csv);;Excel files (*.xlsx)')
         d.selectNameFilter('CSV files (*.csv)')
         d.setOptions(QFileDialog.DontUseNativeDialog)
-        d.setFileMode(QFileDialog.ExistingFile)
+        d.setFileMode(QFileDialog.ExistingFile)  # only one existing file can be selected
         d.exec_()
         selected = d.selectedFiles()
         return selected[0] if len(selected) > 0 else ''
@@ -209,10 +210,12 @@ class FileDialogOpenDirectory(FileDialog):
         d.resize(1200, 800)
         d.setWindowTitle(caption)
         d.setOptions(QFileDialog.DontUseNativeDialog)
-        d.setFileMode(QFileDialog.DirectoryOnly)
-        d.exec_()
-        selected = d.selectedFiles()
-        return selected[0] if len(selected) > 0 else ''
+        d.setFileMode(QFileDialog.DirectoryOnly)  # only one directory can be selected
+        if d.exec_():  # Check if the dialog was accepted
+            selected = d.selectedFiles()
+            return selected[0] if len(selected) > 0 else ''
+        else:
+            return ''  # Return empty string if the dialog was cancelled
 
 
 class MessageBox:
@@ -261,6 +264,7 @@ class MessageBoxYesNo(MessageBox):
 
 class DialogLineEdits:
 
+    TITLE: str = ' '
     LINE_TITLES: List[str]
     LINE_DEFAULTS: List[str]
 
@@ -280,7 +284,7 @@ class DialogLineEdits:
 
     def __init__dialog(self):
         self.dialog = QDialog(parent=self.parent)
-        self.dialog.setWindowTitle(' ')
+        self.dialog.setWindowTitle(self.TITLE)
 
     def __init__layout(self):
         self.layout = QFormLayout(parent=self.dialog)
@@ -307,8 +311,22 @@ class DialogLineEdits:
         return ret if len(ret) > 1 else ret[0]
 
 
-class DialogRead1Read2Suffix(DialogLineEdits):
+class DialogInputRead1Read2Suffix(DialogLineEdits):
 
+    TITLE = 'Input'
+    LINE_TITLES = [
+        'Read 1 Suffix:',
+        'Read 2 Suffix:',
+    ]
+    LINE_DEFAULTS = [
+        '_R1.fastq.gz',
+        '_R2.fastq.gz',
+    ]
+
+
+class DialogOutputRead1Read2Suffix(DialogLineEdits):
+
+    TITLE = 'Output'
     LINE_TITLES = [
         'Read 1 Suffix:',
         'Read 2 Suffix:',
