@@ -138,7 +138,8 @@ class Model:
             r1_suffix: str,
             r2_suffix: str,
             sequencing_batch_table_file: str,
-            output_file: str):
+            output_file: str,
+            use_lab_sample_id: bool):
 
         return BuildRunTable().main(
             seq_df=self.dataframe,
@@ -146,7 +147,8 @@ class Model:
             r1_suffix=r1_suffix,
             r2_suffix=r2_suffix,
             sequencing_batch_table_file=sequencing_batch_table_file,
-            output_file=output_file)
+            output_file=output_file,
+            use_lab_sample_id=use_lab_sample_id)
 
 
 class ReadTable:
@@ -300,6 +302,7 @@ class BuildRunTable:
     r2_suffix: str
     sequencing_batch_table_file: str
     output_file: str
+    use_lab_sample_id: bool
 
     tumor_ids: List[str]
     normal_ids: List[str]
@@ -313,7 +316,8 @@ class BuildRunTable:
             r1_suffix: str,
             r2_suffix: str,
             sequencing_batch_table_file: str,
-            output_file: str):
+            output_file: str,
+            use_lab_sample_id: bool):
 
         self.seq_df = seq_df.copy()
         self.seq_ids = seq_ids
@@ -321,6 +325,7 @@ class BuildRunTable:
         self.r2_suffix = r2_suffix
         self.sequencing_batch_table_file = sequencing_batch_table_file
         self.output_file = output_file
+        self.use_lab_sample_id = use_lab_sample_id
 
         self.subset_seq_df()
         self.set_tumor_ids()
@@ -355,6 +360,9 @@ class BuildRunTable:
         r1, r2 = self.r1_suffix, self.r2_suffix
         normal_id = self.__get_matched_normal_id(tumor_id=tumor_id)
         bed_file = self.__get_bed_file(seq_id=tumor_id)
+        if self.use_lab_sample_id:
+            tumor_id = self.__get_lab_sample_id(sample_id=tumor_id)
+            normal_id = self.__get_lab_sample_id(sample_id=normal_id)
         row = pd.Series({
             'Tumor Sample Name': tumor_id,
             'Tumor Fastq R1': f'{tumor_id}{r1}',
@@ -392,6 +400,14 @@ class BuildRunTable:
         sequencing_batch_id_to_bed_file = seq_batch_df['BED File'].to_dict()
 
         return sequencing_batch_id_to_bed_file.get(sequencing_batch_id, '')
+
+    def __get_lab_sample_id(self, sample_id: Optional[str]) -> Optional[str]:
+        if sample_id is None:
+            return None
+        df = self.seq_df
+        lab_sample_ids = df.loc[df[ID] == sample_id, LAB_SAMPLE_ID].to_list()
+        assert len(lab_sample_ids) == 1, f'More than one Lab Sample ID were found for {sample_id}'
+        return lab_sample_ids[0]
 
     def save_output_file(self):
         if self.output_file.endswith('.xlsx'):

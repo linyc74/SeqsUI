@@ -1,4 +1,4 @@
 Tumor Sample Name,Tumor Fastq R1,Tumor Fastq R2,Normal Sample Name,Normal Fastq R1,Normal Fastq R2,Output Name,BED File
-002-00002-0103-E-X01-02,002-00002-0103-E-X01-02_R1.fastq.gz,002-00002-0103-E-X01-02_R2.fastq.gz,002-00002-0101-E-X01-99,002-00002-0101-E-X01-99_R1.fastq.gz,002-00002-0101-E-X01-99_R2.fastq.gz,002-00002-0103-E-X01-02,Twist_Comprehensive_Exome_Covered_Targets_hg38.bed
-002-00002-0102-E-X01-03,002-00002-0102-E-X01-03_R1.fastq.gz,002-00002-0102-E-X01-03_R2.fastq.gz,002-00002-0101-E-X01-99,002-00002-0101-E-X01-99_R1.fastq.gz,002-00002-0101-E-X01-99_R2.fastq.gz,002-00002-0102-E-X01-03,SureSelectHumanAllExonV8_41.6Mbp_hg38.bed
-002-00003-0102-E-X01-03,002-00003-0102-E-X01-03_R1.fastq.gz,002-00003-0102-E-X01-03_R2.fastq.gz,,,,002-00003-0102-E-X01-03,KAPA_HyperExome_hg38_capture_targets.bed
+Xi-pre,Xi-pre_R1.fastq.gz,Xi-pre_R2.fastq.gz,Xi-normal-99,Xi-normal-99_R1.fastq.gz,Xi-normal-99_R2.fastq.gz,Xi-pre,Twist_Comprehensive_Exome_Covered_Targets_hg38.bed
+Xi-cancer,Xi-cancer_R1.fastq.gz,Xi-cancer_R2.fastq.gz,Xi-normal-99,Xi-normal-99_R1.fastq.gz,Xi-normal-99_R2.fastq.gz,Xi-cancer,SureSelectHumanAllExonV8_41.6Mbp_hg38.bed
+Li-cancer,Li-cancer_R1.fastq.gz,Li-cancer_R2.fastq.gz,,,,Li-cancer,KAPA_HyperExome_hg38_capture_targets.bed

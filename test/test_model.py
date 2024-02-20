@@ -83,6 +83,7 @@ class TestBuildRunTable(TestCase):
             r2_suffix='_R2.fastq.gz',
             sequencing_batch_table_file=f'{self.indir}/sequencing-batch-table.csv',
             output_file=f'{self.outdir}/run-table.csv',
+            use_lab_sample_id=True,
         )
         self.assertDataFrameEqual(
             first=pd.read_csv(f'{self.outdir}/run-table.csv'),
