@@ -358,11 +358,18 @@ class BuildRunTable:
 
     def generate_one_row(self, tumor_id: str):
         r1, r2 = self.r1_suffix, self.r2_suffix
+
         normal_id = self.__get_matched_normal_id(tumor_id=tumor_id)
+        sequencing_batch_id = self.__get_sequencing_batch_id(seq_id=tumor_id)
         bed_file = self.__get_bed_file(seq_id=tumor_id)
+
+        if bed_file == '':
+            print(f'WARNING: BED file not found for "{tumor_id}"', flush=True)
+
         if self.use_lab_sample_id:
             tumor_id = self.__get_lab_sample_id(sample_id=tumor_id)
             normal_id = self.__get_lab_sample_id(sample_id=normal_id)
+
         row = pd.Series({
             'Tumor Sample Name': tumor_id,
             'Tumor Fastq R1': f'{tumor_id}{r1}',
@@ -371,10 +378,10 @@ class BuildRunTable:
             'Normal Fastq R1': '' if normal_id is None else f'{normal_id}{r1}',
             'Normal Fastq R2': '' if normal_id is None else f'{normal_id}{r2}' ,
             'Output Name': tumor_id,
+            'Sequencing Batch ID': sequencing_batch_id,
             'BED File': bed_file,
         })
-        if bed_file == '':
-            print(f'WARNING: BED file not found for "{tumor_id}"', flush=True)
+
         self.run_df = append(self.run_df, row)
 
     def __get_matched_normal_id(self, tumor_id: str) -> Optional[str]:
@@ -388,6 +395,9 @@ class BuildRunTable:
             if seq_id.startswith(matched_normal_prefix):
                 return seq_id
         return None
+
+    def __get_sequencing_batch_id(self, seq_id: str) -> str:
+        return self.seq_df.loc[self.seq_df[ID] == seq_id, SEQUENCING_BATCH_ID].iloc[0]
 
     def __get_bed_file(self, seq_id: str) -> str:
         sequencing_batch_id = self.seq_df.loc[self.seq_df[ID] == seq_id, SEQUENCING_BATCH_ID].iloc[0]
