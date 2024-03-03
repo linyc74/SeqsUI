@@ -218,6 +218,7 @@ class GenerateSequencingTableRow:
 
         self.assert_no_nan()
         self.tell_if_patient_or_sample_exist()
+
         if self.existing_sample:
             return None
 
@@ -229,20 +230,12 @@ class GenerateSequencingTableRow:
 
         return self.out_row
 
-    def tell_if_patient_or_sample_exist(self):
-        a = self.dataframe[LAB] == self.in_row[LAB]
-        b = self.dataframe[LAB_PATIENT_ID] == self.in_row[LAB_PATIENT_ID]
-        c = self.dataframe[LAB_SAMPLE_ID] == self.in_row[LAB_SAMPLE_ID]
-
-        self.existing_patient = any(a & b)
-        self.existing_sample = any(a & b & c)
-
     def assert_no_nan(self):
         for key in [
             HOSPITAL_RESEARCH_CENTER,
-            LAB,
-            LAB_PATIENT_ID,
-            LAB_SAMPLE_ID,
+            LAB,             #
+            LAB_PATIENT_ID,  # these three are required to identify a patient and a sample
+            LAB_SAMPLE_ID,   #
             CANCER_TYPE,
             TISSUE_TYPE,
             SEQUENCING_TYPE,
@@ -250,6 +243,14 @@ class GenerateSequencingTableRow:
             VIAL_SEQUENCING_NUMBER
         ]:
             assert pd.notna(self.in_row[key]), f'Lab Sample ID "{self.in_row[LAB_SAMPLE_ID]}": "{key}" is empty.'
+
+    def tell_if_patient_or_sample_exist(self):
+        a = self.dataframe[LAB] == self.in_row[LAB]
+        b = self.dataframe[LAB_PATIENT_ID] == self.in_row[LAB_PATIENT_ID]
+        c = self.dataframe[LAB_SAMPLE_ID] == self.in_row[LAB_SAMPLE_ID]
+
+        self.existing_patient = any(a & b)
+        self.existing_sample = any(a & b & c)
 
     def cast_datatype(self):
         self.in_row[VIAL_SEQUENCING_NUMBER] = int(self.in_row[VIAL_SEQUENCING_NUMBER])
