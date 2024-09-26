@@ -168,8 +168,8 @@ class ReadTable:
 
         self.read_file()
         self.assert_columns()
-        self.set_columns()
-        self.convert_datetime_columns()
+        self.df = self.df[self.columns]
+        self.df.dropna(how='all', inplace=True)
 
         return self.df
 
@@ -184,14 +184,6 @@ class ReadTable:
     def assert_columns(self):
         for c in self.columns:
             assert c in self.df.columns, f'Column "{c}" not found in "{basename(self.file)}"'
-
-    def set_columns(self):
-        self.df = self.df[self.columns]
-
-    def convert_datetime_columns(self):
-        for c in self.df.columns:
-            if c.endswith('Date'):
-                self.df[c] = pd.to_datetime(self.df[c])
 
 
 class GenerateSequencingTableRow:
