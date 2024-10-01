@@ -30,6 +30,8 @@ class Controller:
         self.action_copy_selected_fastq_files = ActionCopySelectedFastqFiles(self)
         self.action_build_run_table = ActionBuildRunTable(self)
         self.action_fill_in_cell_values = ActionFillInCellValues(self)
+        self.action_undo = ActionUndo(self)
+        self.action_redo = ActionRedo(self)
 
     def __connect_button_actions(self):
         for name in self.view.BUTTON_NAME_TO_LABEL.keys():
@@ -303,3 +305,23 @@ class ActionFillInCellValues(Action):
             self.model.dataframe.loc[row, column] = value
 
         self.view.refresh_table()
+
+
+class ActionUndo(Action):
+
+    def __call__(self):
+        try:
+            self.model.undo()
+            self.view.refresh_table()
+        except Exception as e:
+            self.view.message_box_error(msg=repr(e))
+
+
+class ActionRedo(Action):
+
+    def __call__(self):
+        try:
+            self.model.redo()
+            self.view.refresh_table()
+        except Exception as e:
+            self.view.message_box_error(msg=repr(e))

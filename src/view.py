@@ -79,6 +79,8 @@ class View(QWidget):
         'import_patient_sample_sheet': 'Import Patient Sample Sheet',
         'save_sequencing_table': 'Save Sequencing Table',
 
+        'undo': 'Undo',
+        'redo': 'Redo',
         'sort_ascending': 'Sort (A to Z)',
         'sort_descending': 'Sort (Z to A)',
         'delete_selected_rows': 'Delete Selected Rows',
@@ -93,10 +95,12 @@ class View(QWidget):
         'import_patient_sample_sheet': (1, 0),
         'save_sequencing_table': (2, 0),
 
-        'sort_ascending': (0, 1),
-        'sort_descending': (1, 1),
-        'delete_selected_rows': (2, 1),
-        'reset_table': (3, 1),
+        'undo': (0, 1),
+        'redo': (1, 1),
+        'sort_ascending': (2, 1),
+        'sort_descending': (3, 1),
+        'delete_selected_rows': (4, 1),
+        'reset_table': (5, 1),
 
         'copy_selected_fastq_files': (0, 2),
         'build_run_table': (1, 2),

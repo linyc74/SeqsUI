@@ -78,16 +78,45 @@ SEQUENCING_TABLE_COLUMNS = [
 
 class Model:
 
+    MAX_UNDO = 100
+
     dataframe: pd.DataFrame  # this is the main sequencing table
 
+    undo_cache: List[pd.DataFrame]
+    redo_cache: List[pd.DataFrame]
+
     def __init__(self):
-        self.reset_dataframe()
+        self.dataframe = pd.DataFrame(columns=SEQUENCING_TABLE_COLUMNS)
+        self.undo_cache = []
+        self.redo_cache = []
+
+    def undo(self):
+        if len(self.undo_cache) == 0:
+            return
+        self.redo_cache.append(self.dataframe)
+        self.dataframe = self.undo_cache.pop()
+
+    def redo(self):
+        if len(self.redo_cache) == 0:
+            return
+        self.undo_cache.append(self.dataframe)
+        self.dataframe = self.redo_cache.pop()
+
+    def __add_to_undo_cache(self):
+        self.undo_cache.append(self.dataframe.copy())
+        if len(self.undo_cache) > self.MAX_UNDO:
+            self.undo_cache.pop(0)
+        self.redo_cache = []  # clear redo cache
 
     def reset_dataframe(self):
-        self.dataframe = pd.DataFrame(columns=SEQUENCING_TABLE_COLUMNS)
+        new = pd.DataFrame(columns=SEQUENCING_TABLE_COLUMNS)
+        self.__add_to_undo_cache()
+        self.dataframe = new
 
     def read_sequencing_table(self, file: str):
-        self.dataframe = ReadTable().main(file=file, columns=SEQUENCING_TABLE_COLUMNS)
+        new = ReadTable().main(file=file, columns=SEQUENCING_TABLE_COLUMNS)
+        self.__add_to_undo_cache()
+        self.dataframe = new
 
     def save_sequencing_table(self, file: str):
         if file.endswith('.xlsx'):
@@ -99,28 +128,32 @@ class Model:
         return self.dataframe.copy()
 
     def sort_dataframe(self, by: str, ascending: bool):
-        self.dataframe = self.dataframe.sort_values(
+        new = self.dataframe.sort_values(
             by=by,
             ascending=ascending,
             kind='mergesort'  # deterministic, keep the original order when tied
         ).reset_index(
             drop=True
         )
+        self.__add_to_undo_cache()
+        self.dataframe = new
 
     def drop(self, rows: Optional[List[int]] = None, columns: Optional[List[str]] = None):
-        self.dataframe = self.dataframe.drop(
+        new = self.dataframe.drop(
             index=rows,
             columns=columns
         ).reset_index(
             drop=True
         )
+        self.__add_to_undo_cache()
+        self.dataframe = new
 
     def import_patient_sample_sheet(self, file: str):
         dataframe = self.dataframe.copy()
 
-        new_df = ReadTable().main(file=file, columns=IMPORT_COLUMNS)
+        patient_sample_df = ReadTable().main(file=file, columns=IMPORT_COLUMNS)
 
-        for i, in_row in new_df.iterrows():
+        for i, in_row in patient_sample_df.iterrows():
 
             out_row = GenerateSequencingTableRow().main(
                 dataframe=dataframe,
@@ -130,6 +163,7 @@ class Model:
                 dataframe = append(dataframe, out_row)
 
         # update self.dataframe only after all rows succeed
+        self.__add_to_undo_cache()
         self.dataframe = dataframe
 
     def build_run_table(

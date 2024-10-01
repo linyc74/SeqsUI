@@ -19,6 +19,7 @@ class TestModel(TestCase):
             '001-00001-0101-E-X01-01',
         ]
         self.assertListEqual(expected, actual)
+        self.assertEqual(1, len(model.undo_cache))
 
     def test_import_new_patient(self):
         model = Model()
@@ -30,6 +31,7 @@ class TestModel(TestCase):
             '001-00002-0101-E-X01-01',
         ]
         self.assertListEqual(expected, actual)
+        self.assertEqual(2, len(model.undo_cache))
 
     def test_import_existing_patient_new_sample(self):
         model = Model()
@@ -41,6 +43,7 @@ class TestModel(TestCase):
             '001-00001-0101-R-A01-02',
         ]
         self.assertListEqual(expected, actual)
+        self.assertEqual(2, len(model.undo_cache))
 
     def test_import_existing_sample(self):
         model = Model()
@@ -51,12 +54,27 @@ class TestModel(TestCase):
             '001-00001-0101-E-X01-01',
         ]
         self.assertListEqual(expected, actual)
+        self.assertEqual(2, len(model.undo_cache))
 
     def test_import_nan_exception(self):
         model = Model()
         model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
         with self.assertRaises(AssertionError):
             model.import_patient_sample_sheet(file=f'{self.indir}/patient-sample-sheet-nan.csv')
+        self.assertEqual(1, len(model.undo_cache))
+
+    def test_undo(self):
+        model = Model()
+        model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
+        model.undo()
+        self.assertEqual(0, len(model.dataframe))
+
+    def test_redo(self):
+        model = Model()
+        model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
+        model.undo()
+        model.redo()
+        self.assertEqual(1, len(model.dataframe))
 
 
 class TestBuildRunTable(TestCase):
