@@ -76,6 +76,13 @@ class TestModel(TestCase):
         model.redo()
         self.assertEqual(1, len(model.dataframe))
 
+    def test_fill_in_cell_values(self):
+        model = Model()
+        model.read_sequencing_table(file=f'{self.indir}/sequencing-table.csv')
+        model.fill_in_cell_values(cells=[(0, 'Patient ID')], value=1000)
+        self.assertEqual(1000, model.dataframe.loc[0, 'Patient ID'])
+        self.assertEqual(2, len(model.undo_cache))
+
 
 class TestBuildRunTable(TestCase):
 

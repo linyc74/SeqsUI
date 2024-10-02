@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import date
-from typing import List, Optional
-from os.path import basename, exists
+from os.path import basename
+from typing import List, Optional, Tuple, Any
 
 
 HOSPITAL_RESEARCH_CENTER_TO_CODE = {
@@ -165,6 +165,15 @@ class Model:
         # update self.dataframe only after all rows succeed
         self.__add_to_undo_cache()
         self.dataframe = dataframe
+
+    def fill_in_cell_values(self, cells: List[Tuple[int, str]], value: Any):
+        new = self.dataframe.copy()
+        for idx, column in cells:
+            new.loc[idx, column] = value
+
+        # update self.dataframe only after all cells succeed
+        self.__add_to_undo_cache()
+        self.dataframe = new
 
     def build_run_table(
             self,

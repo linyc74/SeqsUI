@@ -306,10 +306,11 @@ class ActionFillInCellValues(Action):
         if value == '':
             return
 
-        for row, column in selected_cells:
-            self.model.dataframe.loc[row, column] = value
-
-        self.view.refresh_table()
+        try:
+            self.model.fill_in_cell_values(cells=selected_cells, value=value)
+            self.view.refresh_table()
+        except Exception as e:
+            self.view.message_box_error(msg=repr(e))
 
 
 class ActionUndo(Action):
