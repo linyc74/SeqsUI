@@ -1,0 +1,4 @@
+Tumor Sample Name,Tumor Fastq R1,Tumor Fastq R2,Normal Sample Name,Normal Fastq R1,Normal Fastq R2,Output Name,Sequencing Batch ID,BED File
+Xi-pre,Xi-pre_R1.fastq.gz,Xi-pre_R2.fastq.gz,,,,Xi-pre,OD20221103_CLA385,Twist_Comprehensive_Exome_Covered_Targets_hg38.bed
+Xi-cancer,Xi-cancer_R1.fastq.gz,Xi-cancer_R2.fastq.gz,,,,Xi-cancer,NGS1120674-1,SureSelectHumanAllExonV8_41.6Mbp_hg38.bed
+Li-cancer,Li-cancer_R1.fastq.gz,Li-cancer_R2.fastq.gz,,,,Li-cancer,TS231220015,KAPA_HyperExome_hg38_capture_targets.bed

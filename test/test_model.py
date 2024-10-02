@@ -100,10 +100,57 @@ class TestBuildRunTable(TestCase):
             r1_suffix='_R1.fastq.gz',
             r2_suffix='_R2.fastq.gz',
             sequencing_batch_table_file=f'{self.indir}/sequencing-batch-table.csv',
+            fastq_correction_file='',
             output_file=f'{self.outdir}/run-table.csv',
             use_lab_sample_id=True,
         )
         self.assertDataFrameEqual(
             first=pd.read_csv(f'{self.outdir}/run-table.csv'),
             second=pd.read_csv(f'{self.indir}/run-table.csv'),
+        )
+
+    def test_tumor_only(self):
+        seq_df = pd.read_csv(f'{self.indir}/seq-df.csv')
+        seq_ids = [
+            '002-00002-0103-E-X01-02',
+            '002-00002-0102-E-X01-03',
+            '002-00003-0102-E-X01-03',
+        ]
+        BuildRunTable().main(
+            seq_df=seq_df,
+            seq_ids=seq_ids,
+            r1_suffix='_R1.fastq.gz',
+            r2_suffix='_R2.fastq.gz',
+            sequencing_batch_table_file=f'{self.indir}/sequencing-batch-table.csv',
+            fastq_correction_file='',
+            output_file=f'{self.outdir}/run-table.csv',
+            use_lab_sample_id=True,
+        )
+        self.assertDataFrameEqual(
+            first=pd.read_csv(f'{self.outdir}/run-table.csv'),
+            second=pd.read_csv(f'{self.indir}/run-table-tumor-only.csv'),
+        )
+
+    def test_fastq_correction(self):
+        seq_df = pd.read_csv(f'{self.indir}/seq-df.csv')
+        seq_ids = [
+            '002-00002-0101-E-X01-01',
+            '002-00002-0101-E-X01-99',
+            '002-00002-0103-E-X01-02',
+            '002-00002-0102-E-X01-03',
+            '002-00003-0102-E-X01-03',
+        ]
+        BuildRunTable().main(
+            seq_df=seq_df,
+            seq_ids=seq_ids,
+            r1_suffix='_R1.fastq.gz',
+            r2_suffix='_R2.fastq.gz',
+            sequencing_batch_table_file=f'{self.indir}/sequencing-batch-table.csv',
+            fastq_correction_file=f'{self.indir}/md5sum.txt',
+            output_file=f'{self.outdir}/run-table.csv',
+            use_lab_sample_id=True,
+        )
+        self.assertDataFrameEqual(
+            first=pd.read_csv(f'{self.outdir}/run-table.csv'),
+            second=pd.read_csv(f'{self.indir}/run-table-fastq-correction.csv'),
         )

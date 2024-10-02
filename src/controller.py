@@ -273,6 +273,8 @@ class ActionBuildRunTable(Action):
         if sequencing_batch_table_file == '':
             return
 
+        fastq_correction_file = self.view.file_dialog_open_txt(caption='Open Fastq Correction File (Not Required)')
+
         output_file = self.view.file_dialog_save_table(filename='run_table.csv')
         if output_file == '':
             return
@@ -284,8 +286,11 @@ class ActionBuildRunTable(Action):
             r1_suffix=r1_suffix,
             r2_suffix=r2_suffix,
             sequencing_batch_table_file=sequencing_batch_table_file,
+            fastq_correction_file=fastq_correction_file,
             output_file=output_file,
             use_lab_sample_id=use_lab_sample_id)
+
+        self.view.message_box_info(msg='Run table build complete')
 
 
 class ActionFillInCellValues(Action):

@@ -28,4 +28,7 @@ class TestCase(unittest.TestCase):
                 a, b = first.loc[i, c], second.loc[i, c]
                 if pd.isna(a) and pd.isna(b):
                     continue
-                self.assertAlmostEqual(a, b)
+                elif type(a) is str and type(b) is str:
+                    self.assertEqual(a, b)
+                else:
+                    self.assertAlmostEqual(a, b)

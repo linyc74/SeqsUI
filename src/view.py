@@ -145,6 +145,7 @@ class View(QWidget):
 
     def __init__methods(self):
         self.file_dialog_open_table = FileDialogOpenTable(self)
+        self.file_dialog_open_txt = FileDialogOpenTxt(self)
         self.file_dialog_save_table = FileDialogSaveTable(self)
         self.file_dialog_open_directory = FileDialogOpenDirectory(self)
         self.message_box_info = MessageBoxInfo(self)
@@ -186,9 +187,34 @@ class FileDialogOpenTable(FileDialog):
         d.selectNameFilter('CSV files (*.csv)')
         d.setOptions(QFileDialog.DontUseNativeDialog)
         d.setFileMode(QFileDialog.ExistingFile)  # only one existing file can be selected
-        d.exec_()
-        selected = d.selectedFiles()
-        return selected[0] if len(selected) > 0 else ''
+
+        ret = ''  # default, no file object selected and accepted
+        accepted = d.exec_()
+        if accepted:
+            selected = d.selectedFiles()
+            if len(selected) > 0:
+                ret = selected[0]
+        return ret
+
+
+class FileDialogOpenTxt(FileDialog):
+
+    def __call__(self, caption: str = 'Open') -> str:
+        d = QFileDialog(self.parent)
+        d.resize(1200, 800)
+        d.setWindowTitle(caption)
+        d.setNameFilter('All Files (*.*);;Text files (*.txt)')
+        d.selectNameFilter('Text files (*.txt)')
+        d.setOptions(QFileDialog.DontUseNativeDialog)
+        d.setFileMode(QFileDialog.ExistingFile)  # only one existing file can be selected
+
+        ret = ''  # default, no file object selected and accepted
+        accepted = d.exec_()
+        if accepted:
+            selected = d.selectedFiles()
+            if len(selected) > 0:
+                ret = selected[0]
+        return ret
 
 
 class FileDialogSaveTable(FileDialog):
@@ -202,9 +228,14 @@ class FileDialogSaveTable(FileDialog):
         d.selectNameFilter('CSV files (*.csv)')
         d.setOptions(QFileDialog.DontUseNativeDialog)
         d.setAcceptMode(QFileDialog.AcceptSave)
-        d.exec_()
-        selected = d.selectedFiles()
-        return selected[0] if len(selected) > 0 else ''
+
+        ret = ''  # default, no file object selected and accepted
+        accepted = d.exec_()
+        if accepted:
+            selected = d.selectedFiles()
+            if len(selected) > 0:
+                ret = selected[0]
+        return ret
 
 
 class FileDialogOpenDirectory(FileDialog):
@@ -215,11 +246,14 @@ class FileDialogOpenDirectory(FileDialog):
         d.setWindowTitle(caption)
         d.setOptions(QFileDialog.DontUseNativeDialog)
         d.setFileMode(QFileDialog.DirectoryOnly)  # only one directory can be selected
-        if d.exec_():  # Check if the dialog was accepted
+
+        ret = ''  # default, no file object selected and accepted
+        accepted = d.exec_()
+        if accepted:
             selected = d.selectedFiles()
-            return selected[0] if len(selected) > 0 else ''
-        else:
-            return ''  # Return empty string if the dialog was cancelled
+            if len(selected) > 0:
+                ret = selected[0]
+        return ret
 
 
 class MessageBox:

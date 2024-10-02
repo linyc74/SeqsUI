@@ -1,7 +1,7 @@
 import pandas as pd
 from datetime import date
-from os.path import basename
 from typing import List, Optional
+from os.path import basename, exists
 
 
 HOSPITAL_RESEARCH_CENTER_TO_CODE = {
@@ -172,6 +172,7 @@ class Model:
             r1_suffix: str,
             r2_suffix: str,
             sequencing_batch_table_file: str,
+            fastq_correction_file: str,
             output_file: str,
             use_lab_sample_id: bool):
 
@@ -181,6 +182,7 @@ class Model:
             r1_suffix=r1_suffix,
             r2_suffix=r2_suffix,
             sequencing_batch_table_file=sequencing_batch_table_file,
+            fastq_correction_file=fastq_correction_file,
             output_file=output_file,
             use_lab_sample_id=use_lab_sample_id)
 
@@ -328,11 +330,13 @@ class BuildRunTable:
     r1_suffix: str
     r2_suffix: str
     sequencing_batch_table_file: str
+    fastq_correction_file: str
     output_file: str
     use_lab_sample_id: bool
 
     tumor_ids: List[str]
     normal_ids: List[str]
+    correct_fastqs: List[str]
 
     run_df: pd.DataFrame
 
@@ -343,6 +347,7 @@ class BuildRunTable:
             r1_suffix: str,
             r2_suffix: str,
             sequencing_batch_table_file: str,
+            fastq_correction_file: str,
             output_file: str,
             use_lab_sample_id: bool):
 
@@ -351,12 +356,14 @@ class BuildRunTable:
         self.r1_suffix = r1_suffix
         self.r2_suffix = r2_suffix
         self.sequencing_batch_table_file = sequencing_batch_table_file
+        self.fastq_correction_file = fastq_correction_file
         self.output_file = output_file
         self.use_lab_sample_id = use_lab_sample_id
 
         self.subset_seq_df()
         self.set_tumor_ids()
         self.set_normal_ids()
+        self.set_correct_fastqs()
 
         self.run_df = pd.DataFrame()
         for tumor_id in self.tumor_ids:
@@ -383,9 +390,20 @@ class BuildRunTable:
 
         self.normal_ids = normal_df[ID].tolist()
 
-    def generate_one_row(self, tumor_id: str):
-        r1, r2 = self.r1_suffix, self.r2_suffix
+    def set_correct_fastqs(self):
+        if self.fastq_correction_file == '':
+            self.correct_fastqs = []
+            return
 
+        with open(self.fastq_correction_file) as fh:
+            text = fh.read()
+        self.correct_fastqs = []
+        text = text.replace('\t', ' ').replace('\n', ' ')
+        for item in text.split(' '):
+            if item != '':
+                self.correct_fastqs.append(item)
+
+    def generate_one_row(self, tumor_id: str):
         normal_id = self.__get_matched_normal_id(tumor_id=tumor_id)
         sequencing_batch_id = self.__get_sequencing_batch_id(seq_id=tumor_id)
         bed_file = self.__get_bed_file(seq_id=tumor_id)
@@ -395,15 +413,24 @@ class BuildRunTable:
 
         if self.use_lab_sample_id:
             tumor_id = self.__get_lab_sample_id(sample_id=tumor_id)
-            normal_id = self.__get_lab_sample_id(sample_id=normal_id)
+            if normal_id is not None:
+                normal_id = self.__get_lab_sample_id(sample_id=normal_id)
+
+        tumor_fq1 = self.__get_correct_fastq(prefix=tumor_id, suffix=self.r1_suffix)
+        tumor_fq2 = self.__get_correct_fastq(prefix=tumor_id, suffix=self.r2_suffix)
+        if normal_id is not None:
+            normal_fq1 = self.__get_correct_fastq(prefix=normal_id, suffix=self.r1_suffix)
+            normal_fq2 = self.__get_correct_fastq(prefix=normal_id, suffix=self.r2_suffix)
+        else:
+            normal_id, normal_fq1, normal_fq2 = '', '', ''
 
         row = pd.Series({
             'Tumor Sample Name': tumor_id,
-            'Tumor Fastq R1': f'{tumor_id}{r1}',
-            'Tumor Fastq R2': f'{tumor_id}{r2}',
-            'Normal Sample Name': '' if normal_id is None else normal_id,
-            'Normal Fastq R1': '' if normal_id is None else f'{normal_id}{r1}',
-            'Normal Fastq R2': '' if normal_id is None else f'{normal_id}{r2}' ,
+            'Tumor Fastq R1': tumor_fq1,
+            'Tumor Fastq R2': tumor_fq2,
+            'Normal Sample Name': normal_id,
+            'Normal Fastq R1': normal_fq1,
+            'Normal Fastq R2': normal_fq2,
             'Output Name': tumor_id,
             'Sequencing Batch ID': sequencing_batch_id,
             'BED File': bed_file,
@@ -438,13 +465,17 @@ class BuildRunTable:
 
         return sequencing_batch_id_to_bed_file.get(sequencing_batch_id, '')
 
-    def __get_lab_sample_id(self, sample_id: Optional[str]) -> Optional[str]:
-        if sample_id is None:
-            return None
+    def __get_lab_sample_id(self, sample_id: str) -> str:
         df = self.seq_df
         lab_sample_ids = df.loc[df[ID] == sample_id, LAB_SAMPLE_ID].to_list()
         assert len(lab_sample_ids) == 1, f'More than one Lab Sample ID were found for {sample_id}'
         return lab_sample_ids[0]
+
+    def __get_correct_fastq(self, prefix: str, suffix: str) -> str:
+        for f in self.correct_fastqs:
+            if f.startswith(prefix) and f.endswith(suffix):
+                return f
+        return prefix + suffix
 
     def save_output_file(self):
         if self.output_file.endswith('.xlsx'):
