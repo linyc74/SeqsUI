@@ -109,6 +109,8 @@ setup(
 
         os.rename(f'./dist/{f}.app', f'./{f}.app')
 
+        subprocess.check_call(f'zip -r {f}.zip {f}.app', shell=True)
+
         for dir_ in ['build', 'dist']:
             shutil.rmtree(dir_)
         for file in [self.entrypoint_py, 'setup.py']:

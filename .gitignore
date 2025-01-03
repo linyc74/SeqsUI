@@ -11,9 +11,11 @@ __pycache__/
 # Test / data
 .pytest_cache/
 
-# PyInstaller
+# PyInstaller / py2app
 build/
 dist/
-SeqsUI.spec
+*.spec
+setup.py
+.eggs/
 
 todo.md
