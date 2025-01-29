@@ -30,7 +30,7 @@ class EntryPoint:
         self.set_parser()
         self.add_required_arguments()
         self.add_optional_arguments()
-        self.run()
+        BuildApp().main()
 
     def set_parser(self):
         self.parser = argparse.ArgumentParser(
@@ -49,30 +49,29 @@ class EntryPoint:
         for item in OPTIONAL:
             group.add_argument(*item['keys'], **item['properties'])
 
-    def run(self):
-        args = self.parser.parse_args()
-        BuildApp().main()
-
 
 class BuildApp:
 
+    os_name: str
     entrypoint_py: str
 
     def main(self):
+        self.set_os_name()
         self.write_entrypoint_py()
-
-        os_name = platform.system()
-
-        if os_name == 'Darwin':
+        if self.os_name == 'Darwin':
             self.write_setup_py()
             self.build_macos_app()
-        elif os_name == 'Windows':
+        elif self.os_name == 'Windows':
             self.build_windows_exe()
-        else:
-            raise NotImplementedError(f'Unsupported OS: {os_name}')
+
+    def set_os_name(self):
+        self.os_name = platform.system()
+        assert self.os_name in ['Darwin', 'Windows'], f'Unsupported OS: {self.os_name}'
 
     def write_entrypoint_py(self):
-        self.entrypoint_py = f'{APP_NAME}-{VERSION}.py'
+        o = 'win' if self.os_name == 'Windows' else 'mac'
+        self.entrypoint_py = f'{APP_NAME}-{o}-{VERSION}.py'
+
         with open(self.entrypoint_py, 'w') as f:
             f.write(f'''\
 from src import Main
