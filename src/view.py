@@ -169,6 +169,9 @@ class View(QWidget):
         return self.table.get_selected_cells()
 
 
+#
+
+
 class FileDialog:
 
     parent: QWidget
@@ -232,9 +235,9 @@ class FileDialogSaveTable(FileDialog):
         ret = ''  # default, no file object selected and accepted
         accepted = d.exec_()
         if accepted:
-            selected = d.selectedFiles()
-            if len(selected) > 0:
-                ret = selected[0]
+            files = d.selectedFiles()
+            if len(files) > 0:
+                ret = files[0]
         return ret
 
 
@@ -254,6 +257,9 @@ class FileDialogOpenDirectory(FileDialog):
             if len(selected) > 0:
                 ret = selected[0]
         return ret
+
+
+#
 
 
 class MessageBox:
@@ -298,6 +304,9 @@ class MessageBoxYesNo(MessageBox):
     def __call__(self, msg: str) -> bool:
         self.box.setText(msg)
         return self.box.exec_() == QMessageBox.Yes
+
+
+#
 
 
 class DialogLineEdits:
