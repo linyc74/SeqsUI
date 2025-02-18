@@ -5,7 +5,7 @@ from .model import Model
 from .controller import Controller
 
 
-VERSION = 'v1.2.1-beta'
+VERSION = 'v1.2.1'
 STARTING_MESSAGE = f'''\
 SeqsUI {VERSION}
 College of Dentistry, National Yang Ming Chiao Tung University (NYCU), Taiwan
