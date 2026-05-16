@@ -110,7 +110,7 @@ setup(
 
         subprocess.check_call(f'zip -r {f}.zip {f}.app', shell=True)
 
-        for dir_ in ['build', 'dist']:
+        for dir_ in ['build', 'dist', f'{f}.app']:
             shutil.rmtree(dir_)
         for file in [self.entrypoint_py, 'setup.py']:
             os.remove(file)
