@@ -84,7 +84,6 @@ class View(QWidget):
         'sort_ascending': 'Sort (A to Z)',
         'sort_descending': 'Sort (Z to A)',
         'delete_selected_rows': 'Delete Selected Rows',
-        'reset_table': 'Reset Table',
 
         'copy_selected_fastq_files': 'Copy Selected Fastq Files',
         'build_run_table': 'Build Run Table',
@@ -100,7 +99,6 @@ class View(QWidget):
         'sort_ascending': (2, 1),
         'sort_descending': (3, 1),
         'delete_selected_rows': (4, 1),
-        'reset_table': (5, 1),
 
         'copy_selected_fastq_files': (0, 2),
         'build_run_table': (1, 2),

@@ -108,11 +108,6 @@ class Model:
             self.undo_cache.pop(0)
         self.redo_cache = []  # clear redo cache
 
-    def reset_dataframe(self):
-        new = pd.DataFrame(columns=SEQUENCING_TABLE_COLUMNS)
-        self.__add_to_undo_cache()
-        self.dataframe = new
-
     def read_sequencing_table(self, file: str):
         new = ReadTable().main(file=file, columns=SEQUENCING_TABLE_COLUMNS)
         self.__add_to_undo_cache()
