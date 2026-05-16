@@ -9,6 +9,8 @@ HOSPITAL_RESEARCH_CENTER_TO_CODE = {
     'Taipei Veterans General Hospital': '001',
     '宜蘭附醫': '002',
     'National Yang Ming Chiao Tung University Hospital': '002',
+    '台北慈濟醫院': '003',
+    'Taipei Tzu Chi Hospital': '003',
 }
 CANCER_TYPE_TO_CODE = {
     'HNSCC': '01',
