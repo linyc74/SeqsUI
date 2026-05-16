@@ -265,17 +265,7 @@ class GenerateSequencingTableRow:
         return self.out_row
 
     def assert_no_nan(self):
-        for key in [
-            HOSPITAL_RESEARCH_CENTER,
-            LAB,             #
-            LAB_PATIENT_ID,  # these three are required to identify a patient and a sample
-            LAB_SAMPLE_ID,   #
-            CANCER_TYPE,
-            TISSUE_TYPE,
-            SEQUENCING_TYPE,
-            VIAL,
-            VIAL_SEQUENCING_NUMBER
-        ]:
+        for key in IMPORT_COLUMNS:
             assert pd.notna(self.in_row[key]), f'Lab Sample ID "{self.in_row[LAB_SAMPLE_ID]}": "{key}" is empty.'
 
     def tell_if_patient_or_sample_exist(self):

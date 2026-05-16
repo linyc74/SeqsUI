@@ -5,7 +5,7 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QVBoxLayout, QWidget, QTableWidget, QTableWidgetItem, QPushButton, \
     QFileDialog, QMessageBox, QGridLayout, QDialog, QFormLayout, QLineEdit, QDialogButtonBox, QApplication
 from typing import List, Union, Any, Tuple
-from .model import Model
+from .model import Model, IMPORT_COLUMNS
 
 
 class Table(QTableWidget):
@@ -104,7 +104,9 @@ class View(QWidget):
         'build_run_table': (1, 2),
         'fill_in_cell_values': (2, 2),
     }
-
+    BUTTON_NAME_TO_TOOLTIP = {
+        'import_patient_sample_sheet': f'Required columns:\n- {"\n- ".join(IMPORT_COLUMNS)}',
+    }
     model: Model
     vertical_layout: QVBoxLayout
     table: Table
@@ -139,6 +141,9 @@ class View(QWidget):
             setattr(self, f'button_{name}', QPushButton(label))
             button = getattr(self, f'button_{name}')
             pos = self.BUTTON_NAME_TO_POSITION[name]
+            hint = self.BUTTON_NAME_TO_TOOLTIP.get(name, None)
+            if hint is not None:
+                button.setToolTip(hint)
             self.button_grid.addWidget(button, *pos)
 
     def __init__methods(self):
