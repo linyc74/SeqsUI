@@ -108,7 +108,8 @@ setup(
 
         os.rename(f'./dist/{f}.app', f'./{f}.app')
 
-        subprocess.check_call(f'zip -r {f}.zip {f}.app', shell=True)
+        subprocess.check_call(f'codesign --force --deep --sign - {f}.app', shell=True)
+        subprocess.check_call(f'ditto -c -k --keepParent {f}.app {f}.zip', shell=True)
 
         for dir_ in ['build', 'dist', f'{f}.app']:
             shutil.rmtree(dir_)
